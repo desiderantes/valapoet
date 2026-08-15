@@ -38,13 +38,13 @@ namespace ValaPoet {
             this.type_name = builder.type_name;
             this.attributes = new Gee.ArrayList<AttributeSpec>();
             this.attributes.add_all (builder.attributes);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             this.modifiers.add_all (builder.modifiers);
             this.get_body = builder.get_body_block;
-            this.get_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.get_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             this.get_modifiers.add_all (builder.get_modifiers);
             this.set_body = builder.set_body_block;
-            this.set_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.set_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             this.set_modifiers.add_all (builder.set_modifiers);
             this.construct_body = builder.construct_body_block;
             this.is_construct_set = builder.is_construct_set;
@@ -52,8 +52,8 @@ namespace ValaPoet {
             this.is_auto = builder.is_auto;
         }
 
-        public static Builder builder(TypeName type_name,string name) {
-            return new Builder (type_name,name);
+        public static Builder builder (TypeName type_name, string name) {
+            return new Builder (type_name, name);
         }
 
         public class Builder : GLib.Object {
@@ -70,73 +70,73 @@ namespace ValaPoet {
             public CodeBlock? default_val { get; private set; }
             public bool is_auto { get; private set; }
 
-            public Builder (TypeName type_name,string name) {
+            public Builder (TypeName type_name, string name) {
                 this.type_name = type_name;
                 this.name = name;
                 this.attributes = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
-                this.get_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
-                this.set_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+                this.get_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+                this.set_modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder add_attribute(AttributeSpec attribute) {
+            public Builder add_attribute (AttributeSpec attribute) {
                 this.attributes.add (attribute);
                 return this;
             }
 
-            public Builder get_body(CodeBlock body) {
+            public Builder get_body (CodeBlock body) {
                 this.get_body_block = body;
                 return this;
             }
 
-            public Builder add_get_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_get_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.get_modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder set_body(CodeBlock body) {
+            public Builder set_body (CodeBlock body) {
                 this.set_body_block = body;
                 return this;
             }
 
-            public Builder add_set_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_set_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.set_modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder construct_body(CodeBlock body) {
+            public Builder construct_body (CodeBlock body) {
                 this.construct_body_block = body;
                 return this;
             }
 
-            public Builder construct_set(bool is_construct_set = true) {
+            public Builder construct_set (bool is_construct_set = true) {
                 this.is_construct_set = is_construct_set;
                 return this;
             }
 
-            public Builder default_value(string format,...) {
+            public Builder default_value (string format, ...) {
                 var va = va_list ();
-                this.default_val = CodeBlock.of_valist (format,va);
+                this.default_val = CodeBlock.of_valist (format, va);
                 return this;
             }
 
-            public Builder auto() {
+            public Builder auto () {
                 this.is_auto = true;
                 return this;
             }
 
-            public PropertySpec build() {
+            public PropertySpec build () {
                 return new PropertySpec (this);
             }
 

@@ -21,9 +21,9 @@ using Gee;
 
 public class GeeSetSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/gee_set_sample",() => {
+        Test.add_func ("/valapoet/gee_set_sample", () => {
             var expected_output = """using Gee;
 
 void main () {
@@ -37,25 +37,25 @@ void main () {
 	}
 }
 """;
-            var hash_set_type = new ParameterizedTypeName.of (ClassName.get ("Gee","HashSet"),TypeName.STRING);
+            var hash_set_type = new ParameterizedTypeName.of (ClassName.get ("Gee", "HashSet"), TypeName.STRING);
 
             var main_method = MethodSpec.method_builder ("main")
-                               .add_statement ("var my_set = new %T ()",hash_set_type)
-                               .add_statement ("my_set.add (\"one\")")
-                               .add_statement ("my_set.add (\"two\")")
-                               .add_statement ("my_set.add (\"three\")")
-                               .add_statement ("my_set.add (\"two\")")
-                               .begin_control_flow ("foreach (string s in my_set)")
-                               .add_statement ("stdout.printf (\"%s\\n\", s)")
-                               .end_control_flow ()
-                               .build ();
+            .add_statement ("var my_set = new %T ()", hash_set_type)
+            .add_statement ("my_set.add (\"one\")")
+            .add_statement ("my_set.add (\"two\")")
+            .add_statement ("my_set.add (\"three\")")
+            .add_statement ("my_set.add (\"two\")")
+            .begin_control_flow ("foreach (string s in my_set)")
+            .add_statement ("stdout.printf (\"%s\\n\", s)")
+            .end_control_flow ()
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_using ("Gee")
-                             .add_method (main_method)
-                             .build ();
+            .add_using ("Gee")
+            .add_method (main_method)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected_output);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected_output);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();

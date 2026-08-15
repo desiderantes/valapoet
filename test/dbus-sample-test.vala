@@ -22,10 +22,10 @@ using ValaPoetTestUtil;
 
 public class DBusSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/dbus_sample",() => {
+        Test.add_func ("/valapoet/dbus_sample", () => {
             var expected = """[DBus(name = "org.example.DemoService")]
 public class DemoService : GLib.Object {
 	public signal void status_changed (string status);
@@ -39,41 +39,41 @@ public class DemoService : GLib.Object {
 }
 """;
             var dbus_attr = AttributeSpec.builder ("DBus")
-                             .add_argument ("name","\"org.example.DemoService\"")
-                             .build ();
+            .add_argument ("name", "\"org.example.DemoService\"")
+            .build ();
 
             var status_signal = SignalSpec.builder ("status_changed")
-                                 .add_modifiers (ValaModifier.PUBLIC)
-                                 .add_parameter (ParameterSpec.builder (TypeName.STRING,"status").build ())
-                                 .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.STRING, "status").build ())
+            .build ();
 
-            var counter_prop = PropertySpec.builder (TypeName.INT,"counter")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .auto ()
-                                .build ();
+            var counter_prop = PropertySpec.builder (TypeName.INT, "counter")
+            .add_modifiers (ValaModifier.PUBLIC)
+            .auto ()
+            .build ();
 
             var exec_method = MethodSpec.method_builder ("execute_action")
-                               .add_modifiers (ValaModifier.PUBLIC)
-                               .add_parameter (ParameterSpec.builder (TypeName.STRING,"action_name").build ())
-                               .add_statement ("counter++")
-                               .add_statement ("status_changed (action_name)")
-                               .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.STRING, "action_name").build ())
+            .add_statement ("counter++")
+            .add_statement ("status_changed (action_name)")
+            .build ();
 
             var service_class = TypeSpec.class_builder ("DemoService")
-                                 .add_attribute (dbus_attr)
-                                 .add_modifiers (ValaModifier.PUBLIC)
-                                 .superclass (TypeName.OBJECT)
-                                 .add_signal (status_signal)
-                                 .add_property (counter_prop)
-                                 .add_method (exec_method)
-                                 .build ();
+            .add_attribute (dbus_attr)
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_signal (status_signal)
+            .add_property (counter_prop)
+            .add_method (exec_method)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (service_class)
-                             .build ();
+            .add_type (service_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
-            assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string (),{ "gio-2.0" }));
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string (), { "gio-2.0" }));
         });
 
         Test.run ();

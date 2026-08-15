@@ -21,9 +21,9 @@ using Gee;
 
 public class GenericsSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/generics_sample",() => {
+        Test.add_func ("/valapoet/generics_sample", () => {
             var expected = """public class Container<G> : GLib.Object {
 	public void process<T> (T item) {
 	}
@@ -33,23 +33,23 @@ public class GenericsSampleTest : Object {
             var tv_t = TypeVariableName.get ("T");
 
             var process_method = MethodSpec.method_builder ("process")
-                                  .add_modifiers (ValaModifier.PUBLIC)
-                                  .add_type_variable (tv_t)
-                                  .add_parameter (ParameterSpec.builder (tv_t,"item").build ())
-                                  .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_type_variable (tv_t)
+            .add_parameter (ParameterSpec.builder (tv_t, "item").build ())
+            .build ();
 
             var container_class = TypeSpec.class_builder ("Container")
-                                   .add_modifiers (ValaModifier.PUBLIC)
-                                   .add_type_variable (tv_g)
-                                   .superclass (TypeName.OBJECT)
-                                   .add_method (process_method)
-                                   .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_type_variable (tv_g)
+            .superclass (TypeName.OBJECT)
+            .add_method (process_method)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (container_class)
-                             .build ();
+            .add_type (container_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();

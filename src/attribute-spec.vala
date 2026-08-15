@@ -31,7 +31,7 @@ namespace ValaPoet {
             }
         }
 
-        public static Builder builder(string name) {
+        public static Builder builder (string name) {
             return new Builder (name);
         }
 
@@ -44,13 +44,13 @@ namespace ValaPoet {
                 this.arguments = new Gee.HashMap<string, CodeBlock>();
             }
 
-            public Builder add_argument(string name, string format, ...) {
+            public Builder add_argument (string name, string format, ...) {
                 var va = va_list ();
                 arguments[name] = CodeBlock.of_valist (format, va);
                 return this;
             }
 
-            public AttributeSpec build() {
+            public AttributeSpec build () {
                 return new AttributeSpec (this);
             }
 

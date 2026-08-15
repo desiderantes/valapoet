@@ -32,19 +32,19 @@ namespace ValaPoet {
         }
 
         public ArrayTypeName.of (TypeName component_type, int rank = 1) {
-            this(component_type, rank);
+            this (component_type, rank);
         }
 
-        public override string to_string() {
+        public override string to_string () {
             var commas = new string[rank];
-            for (int i = 0 ; i < rank ; i++) {
+            for (int i = 0; i < rank; i++) {
                 commas[i] = "";
             }
             string rank_str = string.joinv (",", commas);
             return component_type.to_string () + "[" + rank_str + "]";
         }
 
-        public override TypeName copy() {
+        public override TypeName copy () {
             var copy = new ArrayTypeName (this.component_type.copy (), this.rank);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;

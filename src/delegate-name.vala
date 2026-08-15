@@ -33,25 +33,25 @@ namespace ValaPoet {
             this.annotations = new Gee.ArrayList<AttributeSpec>();
         }
 
-        public static new DelegateName get(string name, TypeName return_type) {
+        public static new DelegateName get (string name, TypeName return_type) {
             return new DelegateName (name, return_type);
         }
 
-        public DelegateName add_parameter(ParameterSpec param) {
+        public DelegateName add_parameter (ParameterSpec param) {
             this.parameters.add (param);
             return this;
         }
 
-        public DelegateName add_annotation(AttributeSpec attr) {
+        public DelegateName add_annotation (AttributeSpec attr) {
             this.annotations.add (attr);
             return this;
         }
 
-        public override string to_string() {
+        public override string to_string () {
             return this.name;
         }
 
-        public override TypeName copy() {
+        public override TypeName copy () {
             var copy_params = new Gee.ArrayList<ParameterSpec>();
             copy_params.add_all (this.parameters);
             var copy = new DelegateName (this.name, this.return_type.copy (), copy_params);

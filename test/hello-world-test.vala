@@ -22,9 +22,9 @@ using ValaPoetTestUtil;
 
 public class HelloWorldTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/hello_world",() => {
+        Test.add_func ("/valapoet/hello_world", () => {
             var expected_output = """namespace Demo {
 
 	public class HelloWorld : GLib.Object {
@@ -36,27 +36,27 @@ public class HelloWorldTest : Object {
 """;
 
             var main_method = MethodSpec.method_builder ("main")
-                               .add_modifiers (ValaModifier.PUBLIC,ValaModifier.STATIC)
-                               .returns (TypeName.VOID)
-                               .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING),"args").build ())
-                               .add_statement ("stdout.printf (\"Hello, World\\n\")")
-                               .build ();
+            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.STATIC)
+            .returns (TypeName.VOID)
+            .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args").build ())
+            .add_statement ("stdout.printf (\"Hello, World\\n\")")
+            .build ();
 
             var hello_world_class = TypeSpec.class_builder ("HelloWorld")
-                                     .add_modifiers (ValaModifier.PUBLIC)
-                                     .superclass (TypeName.OBJECT)
-                                     .add_method (main_method)
-                                     .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (main_method)
+            .build ();
 
             var demo_namespace = TypeSpec.namespace_builder ("Demo")
-                                  .add_type (hello_world_class)
-                                  .build ();
+            .add_type (hello_world_class)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (demo_namespace)
-                             .build ();
+            .add_type (demo_namespace)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected_output);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected_output);
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();

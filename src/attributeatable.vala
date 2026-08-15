@@ -25,7 +25,7 @@ namespace ValaPoet {
         public interface Builder<T> {
             public abstract Gee.List<AttributeSpec> attributes { get; }
 
-            public Builder<T> add_attribute(AttributeSpec attribute_spec) {
+            public Builder<T> add_attribute (AttributeSpec attribute_spec) {
                 attributes.add (attribute_spec);
                 return this;
             }

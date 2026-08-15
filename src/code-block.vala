@@ -18,10 +18,10 @@
 
 namespace ValaPoet {
 
-/**
- * A fragment of a .vala file, potentially containing declarations, statements, and documentation.
- * Code blocks are not necessarily well-formed Vala code, and are not validated.
- */
+    /**
+     * A fragment of a .vala file, potentially containing declarations, statements, and documentation.
+     * Code blocks are not necessarily well-formed Vala code, and are not validated.
+     */
     public class CodeBlock : GLib.Object {
         /** A heterogeneous list containing string literals and value placeholders. */
         public Gee.ArrayList<string> format_parts { get; private set; }
@@ -34,22 +34,22 @@ namespace ValaPoet {
             this.args.add_all (builder.args);
         }
 
-        public static CodeBlock of(string format, ...) {
+        public static CodeBlock of (string format, ...) {
             var va = va_list ();
             return of_valist (format, va);
         }
 
-        public static CodeBlock of_valist(string format, va_list va) {
+        public static CodeBlock of_valist (string format, va_list va) {
             var builder = new Builder ();
             builder.add_valist (format, va);
             return builder.build ();
         }
 
-        public bool is_empty() {
+        public bool is_empty () {
             return format_parts.is_empty;
         }
 
-        public static Builder builder() {
+        public static Builder builder () {
             return new Builder ();
         }
 
@@ -57,12 +57,12 @@ namespace ValaPoet {
             public Gee.ArrayList<string> format_parts = new Gee.ArrayList<string>();
             public Gee.ArrayList<Value ?> args = new Gee.ArrayList<Value ?>();
 
-            public Builder add(string format, ...) {
+            public Builder add (string format, ...) {
                 var va = va_list ();
                 return add_valist (format, va);
             }
 
-            public Builder add_valist(string format, va_list va) {
+            public Builder add_valist (string format, va_list va) {
                 int len = format.length;
                 int p = 0;
                 var current = new StringBuilder ();
@@ -86,11 +86,11 @@ namespace ValaPoet {
 
                             Value val = Value (typeof (Object));
                             if (next == 'S') {
-                                string s = va.arg<string>();
+                                string s = va.arg<string> ();
                                 val = Value (typeof (string));
                                 val.set_string (s);
                             } else {
-                                Object obj = va.arg<Object>();
+                                Object obj = va.arg<Object> ();
                                 val.set_object (obj);
                             }
                             args.add (val);
@@ -116,12 +116,12 @@ namespace ValaPoet {
                 return this;
             }
 
-            public Builder add_statement(string format, ...) {
+            public Builder add_statement (string format, ...) {
                 var va = va_list ();
                 return add_statement_valist (format, va);
             }
 
-            public Builder add_statement_valist(string format, va_list va) {
+            public Builder add_statement_valist (string format, va_list va) {
                 add ("$[");
                 add_valist (format, va);
                 string trimmed = format.strip ();
@@ -132,12 +132,12 @@ namespace ValaPoet {
                 return this;
             }
 
-            public Builder add_raw(string code) {
+            public Builder add_raw (string code) {
                 format_parts.add (code);
                 return this;
             }
 
-            public Builder add_statement_raw(string code) {
+            public Builder add_statement_raw (string code) {
                 add ("$[");
                 add_raw (code);
                 string trimmed = code.strip ();
@@ -148,56 +148,56 @@ namespace ValaPoet {
                 return this;
             }
 
-            public Builder begin_control_flow(string format, ...) {
+            public Builder begin_control_flow (string format, ...) {
                 var va = va_list ();
                 return begin_control_flow_valist (format, va);
             }
 
-            public Builder begin_control_flow_valist(string format, va_list va) {
+            public Builder begin_control_flow_valist (string format, va_list va) {
                 add_valist (format + " {\n", va);
                 indent ();
                 return this;
             }
 
-            public Builder next_control_flow(string format, ...) {
+            public Builder next_control_flow (string format, ...) {
                 var va = va_list ();
                 return next_control_flow_valist (format, va);
             }
 
-            public Builder next_control_flow_valist(string format, va_list va) {
+            public Builder next_control_flow_valist (string format, va_list va) {
                 unindent ();
                 add_valist ("} " + format + " {\n", va);
                 indent ();
                 return this;
             }
 
-            public Builder end_control_flow() {
+            public Builder end_control_flow () {
                 unindent ();
                 add ("}\n");
                 return this;
             }
 
-            public Builder add_code(CodeBlock code_block) {
+            public Builder add_code (CodeBlock code_block) {
                 format_parts.add_all (code_block.format_parts);
                 args.add_all (code_block.args);
                 return this;
             }
 
-            public Builder indent() {
+            public Builder indent () {
                 this.format_parts.add ("$>");
                 return this;
             }
 
-            public Builder unindent() {
+            public Builder unindent () {
                 this.format_parts.add ("$<");
                 return this;
             }
 
-            public bool is_empty() {
+            public bool is_empty () {
                 return format_parts.is_empty;
             }
 
-            public CodeBlock build() {
+            public CodeBlock build () {
                 return new CodeBlock (this);
             }
 

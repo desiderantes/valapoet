@@ -22,9 +22,9 @@ using ValaPoetTestUtil;
 
 public class SignalSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/signal_sample",() => {
+        Test.add_func ("/valapoet/signal_sample", () => {
             var expected_output = """class Foo {
 	public signal void some_event (int i);
 }
@@ -45,41 +45,41 @@ class Demo {
 """;
 
             var some_event_signal = SignalSpec.builder ("some_event")
-                                     .add_modifiers (ValaModifier.PUBLIC)
-                                     .add_parameter (ParameterSpec.builder (TypeName.INT,"i").build ())
-                                     .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "i").build ())
+            .build ();
 
             var foo_class = TypeSpec.class_builder ("Foo")
-                             .add_signal (some_event_signal)
-                             .build ();
+            .add_signal (some_event_signal)
+            .build ();
 
             var on_some_event_method = MethodSpec.method_builder ("on_some_event")
-                                        .add_modifiers (ValaModifier.STATIC)
-                                        .add_parameter (ParameterSpec.builder (ClassName.get ("","Foo"),"sender").build ())
-                                        .add_parameter (ParameterSpec.builder (TypeName.INT,"i").build ())
-                                        .add_statement ("stdout.printf (\"Handler A: %d\\n\", i)")
-                                        .build ();
+            .add_modifiers (ValaModifier.STATIC)
+            .add_parameter (ParameterSpec.builder (ClassName.get ("", "Foo"), "sender").build ())
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "i").build ())
+            .add_statement ("stdout.printf (\"Handler A: %d\\n\", i)")
+            .build ();
 
             var main_method = MethodSpec.method_builder ("main")
-                               .add_modifiers (ValaModifier.STATIC)
-                               .add_statement ("var foo = new Foo ()")
-                               .add_statement ("foo.some_event.connect (on_some_event)")
-                               .add_statement ("foo.some_event.connect ((s, i) => stdout.printf (\"Handler B: %d\\n\", i))")
-                               .add_statement ("foo.some_event (42)")
-                               .add_statement ("foo.some_event.disconnect (on_some_event)")
-                               .build ();
+            .add_modifiers (ValaModifier.STATIC)
+            .add_statement ("var foo = new Foo ()")
+            .add_statement ("foo.some_event.connect (on_some_event)")
+            .add_statement ("foo.some_event.connect ((s, i) => stdout.printf (\"Handler B: %d\\n\", i))")
+            .add_statement ("foo.some_event (42)")
+            .add_statement ("foo.some_event.disconnect (on_some_event)")
+            .build ();
 
             var demo_class = TypeSpec.class_builder ("Demo")
-                              .add_method (on_some_event_method)
-                              .add_method (main_method)
-                              .build ();
+            .add_method (on_some_event_method)
+            .add_method (main_method)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (foo_class)
-                             .add_type (demo_class)
-                             .build ();
+            .add_type (foo_class)
+            .add_type (demo_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected_output);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected_output);
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();

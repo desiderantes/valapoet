@@ -31,13 +31,13 @@ namespace ValaPoet {
             this.return_type = builder.return_type;
             this.parameters = new Gee.ArrayList<ParameterSpec>();
             this.parameters.add_all (builder.parameters);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             this.modifiers.add_all (builder.modifiers);
             this.attributes = new Gee.ArrayList<AttributeSpec>();
             this.attributes.add_all (builder.attributes);
         }
 
-        public static Builder builder(string name) {
+        public static Builder builder (string name) {
             return new Builder (name);
         }
 
@@ -51,33 +51,33 @@ namespace ValaPoet {
             public Builder (string name) {
                 this.name = name;
                 this.parameters = new Gee.ArrayList<ParameterSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
                 this.attributes = new Gee.ArrayList<AttributeSpec>();
             }
 
-            public Builder returns(TypeName return_type) {
+            public Builder returns (TypeName return_type) {
                 this.return_type = return_type;
                 return this;
             }
 
-            public Builder add_parameter(ParameterSpec parameter) {
+            public Builder add_parameter (ParameterSpec parameter) {
                 this.parameters.add (parameter);
                 return this;
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder add_attribute(AttributeSpec attribute) {
+            public Builder add_attribute (AttributeSpec attribute) {
                 this.attributes.add (attribute);
                 return this;
             }
 
-            public SignalSpec build() {
+            public SignalSpec build () {
                 return new SignalSpec (this);
             }
 

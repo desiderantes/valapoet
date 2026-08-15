@@ -22,10 +22,10 @@ using ValaPoetTestUtil;
 
 public class ParameterDirectionsPointersTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/parameter_directions_pointers",() => {
+        Test.add_func ("/valapoet/parameter_directions_pointers", () => {
             var expected = """public class BaseHandler : GLib.Object {
 	public void process_data (int input, out int output, ref int status) {
 		output = input * 2;
@@ -42,78 +42,78 @@ public class CustomHandler : BaseHandler {
 	}
 }
 """;
-            var p_input = ParameterSpec.builder (TypeName.INT,"input").build ();
+            var p_input = ParameterSpec.builder (TypeName.INT, "input").build ();
 
-            var p_output = ParameterSpec.builder (TypeName.INT,"output")
-                            .direction (ParameterSpec.Direction.OUT)
-                            .build ();
+            var p_output = ParameterSpec.builder (TypeName.INT, "output")
+            .direction (ParameterSpec.Direction.OUT)
+            .build ();
 
-            var p_status = ParameterSpec.builder (TypeName.INT,"status")
-                            .direction (ParameterSpec.Direction.REF)
-                            .build ();
+            var p_status = ParameterSpec.builder (TypeName.INT, "status")
+            .direction (ParameterSpec.Direction.REF)
+            .build ();
 
             var base_process = MethodSpec.method_builder ("process_data")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .add_parameter (p_input)
-                                .add_parameter (p_output)
-                                .add_parameter (p_status)
-                                .add_statement ("output = input * 2")
-                                .add_statement ("status = 1")
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (p_input)
+            .add_parameter (p_output)
+            .add_parameter (p_status)
+            .add_statement ("output = input * 2")
+            .add_statement ("status = 1")
+            .build ();
 
             var base_class = TypeSpec.class_builder ("BaseHandler")
-                              .add_modifiers (ValaModifier.PUBLIC)
-                              .superclass (TypeName.OBJECT)
-                              .add_method (base_process)
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (base_process)
+            .build ();
 
             var hide_process = MethodSpec.method_builder ("process_data")
-                                .add_modifiers (ValaModifier.PUBLIC,ValaModifier.NEW)
-                                .add_parameter (p_input)
-                                .add_parameter (p_output)
-                                .add_parameter (p_status)
-                                .add_statement ("output = input * 3")
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.NEW)
+            .add_parameter (p_input)
+            .add_parameter (p_output)
+            .add_parameter (p_status)
+            .add_statement ("output = input * 3")
+            .build ();
 
             var void_ptr_type = TypeName.VOID.pointer_to ();
-            var matrix_type = new ArrayTypeName.of (TypeName.INT,2);
+            var matrix_type = new ArrayTypeName.of (TypeName.INT, 2);
 
             var raw_method = MethodSpec.method_builder ("handle_raw_pointer")
-                              .add_modifiers (ValaModifier.PUBLIC)
-                              .add_parameter (ParameterSpec.builder (void_ptr_type,"ptr").build ())
-                              .add_parameter (ParameterSpec.builder (matrix_type,"matrix").build ())
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (void_ptr_type, "ptr").build ())
+            .add_parameter (ParameterSpec.builder (matrix_type, "matrix").build ())
+            .build ();
 
             var custom_class = TypeSpec.class_builder ("CustomHandler")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .superclass (ClassName.get ("","BaseHandler"))
-                                .add_method (hide_process)
-                                .add_method (raw_method)
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (ClassName.get ("", "BaseHandler"))
+            .add_method (hide_process)
+            .add_method (raw_method)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (base_class)
-                             .add_type (custom_class)
-                             .build ();
+            .add_type (base_class)
+            .add_type (custom_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
-        Test.add_func ("/valapoet/primitive_type_helpers",() => {
+        Test.add_func ("/valapoet/primitive_type_helpers", () => {
             var buffer_class = TypeSpec.class_builder ("BufferContainer")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .superclass (TypeName.OBJECT)
-                                .add_field (FieldSpec.builder (TypeName.SIZE_T,"size").add_modifiers (ValaModifier.PUBLIC).build ())
-                                .add_field (FieldSpec.builder (TypeName.SSIZE_T,"ssize").add_modifiers (ValaModifier.PUBLIC).build ())
-                                .add_field (FieldSpec.builder (TypeName.UINT32,"id32").add_modifiers (ValaModifier.PUBLIC).build ())
-                                .add_field (FieldSpec.builder (TypeName.INT64,"id64").add_modifiers (ValaModifier.PUBLIC).build ())
-                                .add_field (FieldSpec.builder (TypeName.UINT64,"uid64").add_modifiers (ValaModifier.PUBLIC).build ())
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_field (FieldSpec.builder (TypeName.SIZE_T, "size").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.SSIZE_T, "ssize").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.UINT32, "id32").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.INT64, "id64").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.UINT64, "uid64").add_modifiers (ValaModifier.PUBLIC).build ())
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (buffer_class)
-                             .build ();
+            .add_type (buffer_class)
+            .build ();
 
             string code = vala_file.to_string ();
             assert_true (code.contains ("public size_t size;"));

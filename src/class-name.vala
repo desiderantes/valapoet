@@ -31,11 +31,11 @@ namespace ValaPoet {
             this.annotations = new Gee.ArrayList<AttributeSpec>();
         }
 
-        public static new ClassName get(string namespace_name, string simple_name) {
+        public static new ClassName get (string namespace_name, string simple_name) {
             return new ClassName (namespace_name, simple_name);
         }
 
-        public ClassName nested_class(string name) {
+        public ClassName nested_class (string name) {
             return new ClassName (this.namespace_name, name, this);
         }
 
@@ -51,11 +51,11 @@ namespace ValaPoet {
             }
         }
 
-        public override string to_string() {
+        public override string to_string () {
             return this.canonical_name;
         }
 
-        public override TypeName copy() {
+        public override TypeName copy () {
             var copy = new ClassName (this.namespace_name, this.simple_name, this.enclosing_class_name);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;

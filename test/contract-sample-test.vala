@@ -21,26 +21,26 @@ using Gee;
 
 public class ContractSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/contract_sample",() => {
+        Test.add_func ("/valapoet/contract_sample", () => {
             var expected = """public void set_amount (int amount)
 requires (amount > 0)
 ensures (amount != 0) {
 }
 """;
             var method = MethodSpec.method_builder ("set_amount")
-                          .add_modifiers (ValaModifier.PUBLIC)
-                          .add_parameter (ParameterSpec.builder (TypeName.INT,"amount").build ())
-                          .add_requires ("amount > 0")
-                          .add_ensures ("amount != 0")
-                          .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "amount").build ())
+            .add_requires ("amount > 0")
+            .add_ensures ("amount != 0")
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_method (method)
-                             .build ();
+            .add_method (method)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();

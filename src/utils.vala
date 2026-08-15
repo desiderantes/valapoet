@@ -20,22 +20,22 @@ using Gee;
 
 namespace ValaPoet.Utils {
 
-    public static Gee.Set<T> set_of<T>(T[] args) {
+    public static Gee.Set<T> set_of<T> (T[] args) {
         var retval = new Gee.HashSet<T>();
         retval.add_all_array (args);
         return retval;
     }
 
-    public static Gee.Map<K,V> map_of<K,V>(Pair<K,V>[] pairs) {
-        var retval = new Gee.HashMap<K,V>();
+    public static Gee.Map<K, V> map_of<K, V> (Pair<K, V>[] pairs) {
+        var retval = new Gee.HashMap<K, V>();
         foreach (var pair in pairs) {
             retval[pair.first] = pair.second;
         }
         return retval;
     }
 
-    public static Gee.MultiMap<K,V> multimap_of<K,V>(Pair<K,Set<V> >[] pairs) {
-        var retval = new Gee.HashMultiMap<K,V>();
+    public static Gee.MultiMap<K, V> multimap_of<K, V> (Pair<K, Set<V> >[] pairs) {
+        var retval = new Gee.HashMultiMap<K, V>();
         foreach (var pair in pairs) {
             foreach (var item in pair.second) {
                 retval[pair.first] = item;
@@ -44,11 +44,11 @@ namespace ValaPoet.Utils {
         return retval;
     }
 
-    public class Pair<K,V> {
+    public class Pair<K, V> {
         public K first;
         public V second;
 
-        public Pair (K first,V second) {
+        public Pair (K first, V second) {
             this.first = first;
             this.second = second;
         }

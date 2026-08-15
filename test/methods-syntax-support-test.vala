@@ -21,10 +21,10 @@ using Gee;
 
 public class MethodsSyntaxSupportTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/methods_syntax_support",() => {
+        Test.add_func ("/valapoet/methods_syntax_support", () => {
             var expected = """public class CustomCollection : GLib.Object {
 	public string get (int index) {
 		return "item";
@@ -43,49 +43,84 @@ public class MethodsSyntaxSupportTest : Object {
 }
 """;
             var get_method = MethodSpec.method_builder ("get")
-                              .add_modifiers (ValaModifier.PUBLIC)
-                              .add_parameter (ParameterSpec.builder (TypeName.INT,"index").build ())
-                              .returns (TypeName.STRING)
-                              .add_statement ("return \"item\"")
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "index").build ())
+            .returns (TypeName.STRING)
+            .add_statement ("return \"item\"")
+            .build ();
 
             var set_method = MethodSpec.method_builder ("set")
-                              .add_modifiers (ValaModifier.PUBLIC)
-                              .add_parameter (ParameterSpec.builder (TypeName.INT,"index").build ())
-                              .add_parameter (ParameterSpec.builder (TypeName.STRING,"item").build ())
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "index").build ())
+            .add_parameter (ParameterSpec.builder (TypeName.STRING, "item").build ())
+            .build ();
 
             var contains_method = MethodSpec.method_builder ("contains")
-                                   .add_modifiers (ValaModifier.PUBLIC)
-                                   .add_parameter (ParameterSpec.builder (TypeName.STRING,"needle").build ())
-                                   .returns (TypeName.BOOL)
-                                   .add_statement ("return true")
-                                   .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_parameter (ParameterSpec.builder (TypeName.STRING, "needle").build ())
+            .returns (TypeName.BOOL)
+            .add_statement ("return true")
+            .build ();
 
             var to_string_method = MethodSpec.method_builder ("to_string")
-                                    .add_modifiers (ValaModifier.PUBLIC)
-                                    .returns (TypeName.STRING)
-                                    .add_statement ("return \"CustomCollection\"")
-                                    .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .returns (TypeName.STRING)
+            .add_statement ("return \"CustomCollection\"")
+            .build ();
 
             var coll_class = TypeSpec.class_builder ("CustomCollection")
-                              .add_modifiers (ValaModifier.PUBLIC)
-                              .superclass (TypeName.OBJECT)
-                              .add_method (get_method)
-                              .add_method (set_method)
-                              .add_method (contains_method)
-                              .add_method (to_string_method)
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (get_method)
+            .add_method (set_method)
+            .add_method (contains_method)
+            .add_method (to_string_method)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (coll_class)
-                             .build ();
+            .add_type (coll_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
+        });
+
+        Test.add_func ("/valapoet/nested_enum_with_method", () => {
+            var enum_to_string = MethodSpec.method_builder ("to_string")
+            .add_modifiers (ValaModifier.PUBLIC)
+            .returns (TypeName.STRING)
+            .add_statement ("return \"NONE\"")
+            .build ();
+
+            var feature_enum = TypeSpec.enum_builder ("Feature")
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_enum_constant ("NONE", 0)
+            .add_method (enum_to_string)
+            .build ();
+
+            var outer_class = TypeSpec.class_builder ("Outer")
+            .add_modifiers (ValaModifier.PUBLIC)
+            .add_type (feature_enum)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (outer_class)
+            .build ();
+
+            var generated = vala_file.to_string ();
+            var expected = """public class Outer {
+	public enum Feature {
+		NONE = 0;
+
+		public string to_string () {
+			return "NONE";
+		}
+	}
+}
+""";
+            assert_cmpstr (generated, GLib.CompareOperator.EQ, expected);
         });
 
         Test.run ();
     }
-
 }

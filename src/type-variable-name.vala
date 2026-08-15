@@ -25,25 +25,25 @@ namespace ValaPoet {
         public string name { get; private set; }
         public TypeName? bounds { get; private set; }
 
-        public TypeVariableName (string name,TypeName? bounds = null) {
+        public TypeVariableName (string name, TypeName? bounds = null) {
             this.name = name;
             this.bounds = bounds;
             this.annotations = new Gee.ArrayList<AttributeSpec>();
         }
 
-        public static new TypeVariableName get(string name,TypeName? bounds = null) {
-            return new TypeVariableName (name,bounds);
+        public static new TypeVariableName get (string name, TypeName? bounds = null) {
+            return new TypeVariableName (name, bounds);
         }
 
-        public override string to_string() {
+        public override string to_string () {
             if (bounds != null) {
                 return name + " : " + bounds.to_string ();
             }
             return name;
         }
 
-        public override TypeName copy() {
-            var copy = new TypeVariableName (this.name,(this.bounds != null) ? this.bounds.copy () : null);
+        public override TypeName copy () {
+            var copy = new TypeVariableName (this.name, (this.bounds != null) ? this.bounds.copy () : null);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
             foreach (var a in this.annotations) {

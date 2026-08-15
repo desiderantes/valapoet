@@ -27,37 +27,37 @@ namespace ValaPoet {
         public bool is_unowned { get; set; }
         public bool is_owned { get; set; }
 
-        public TypeName nullable() {
+        public TypeName nullable () {
             var copy = this.copy ();
             copy.is_nullable = true;
             return copy;
         }
 
-        public TypeName @weak() {
+        public TypeName @weak () {
             var copy = this.copy ();
             copy.is_weak = true;
             return copy;
         }
 
-        public TypeName @unowned() {
+        public TypeName @unowned () {
             var copy = this.copy ();
             copy.is_unowned = true;
             return copy;
         }
 
-        public TypeName @owned() {
+        public TypeName @owned () {
             var copy = this.copy ();
             copy.is_owned = true;
             return copy;
         }
 
-        public PointerTypeName pointer_to() {
+        public PointerTypeName pointer_to () {
             return new PointerTypeName (this);
         }
 
         // Abstract methods to be implemented by subclasses
-        public abstract string to_string();
-        public abstract TypeName copy();
+        public abstract string to_string ();
+        public abstract TypeName copy ();
 
         // Lazy initialized constants for primitive types
         private static TypeName? _int = null;
@@ -119,7 +119,7 @@ namespace ValaPoet {
         private static TypeName? _object = null;
         public static TypeName OBJECT {
             get {
-                if (_object == null)_object = new ClassName ("GLib","Object");
+                if (_object == null)_object = new ClassName ("GLib", "Object");
                 return _object;
             }
         }
@@ -181,7 +181,7 @@ namespace ValaPoet {
         }
     }
 
-// Internal class for representing primitives
+    // Internal class for representing primitives
     internal class PrimitiveTypeName : TypeName {
         private string keyword;
 
@@ -190,11 +190,11 @@ namespace ValaPoet {
             this.annotations = new Gee.ArrayList<AttributeSpec>();
         }
 
-        public override string to_string() {
+        public override string to_string () {
             return this.keyword;
         }
 
-        public override TypeName copy() {
+        public override TypeName copy () {
             var copy = new PrimitiveTypeName (this.keyword);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;

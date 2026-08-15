@@ -21,34 +21,34 @@ using Gee;
 
 public class NameAllocatorTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/name_allocator",() => {
+        Test.add_func ("/valapoet/name_allocator", () => {
             var allocator = new NameAllocator ();
-            assert_true (allocator.new_name ("class") == "@class");
-            assert_true (allocator.new_name ("class") == "@class_2");
-            assert_true (allocator.new_name ("signal") == "@signal");
-            assert_true (allocator.new_name ("int") == "_int");
-            assert_true (allocator.new_name ("foo") == "foo");
-            assert_true (allocator.new_name ("foo") == "foo_2");
-            assert_true (allocator.new_name ("123abc") == "_123abc");
+            assert_cmpstr (allocator.new_name ("class"), GLib.CompareOperator.EQ, "@class");
+            assert_cmpstr (allocator.new_name ("class"), GLib.CompareOperator.EQ, "@class_2");
+            assert_cmpstr (allocator.new_name ("signal"), GLib.CompareOperator.EQ, "@signal");
+            assert_cmpstr (allocator.new_name ("int"), GLib.CompareOperator.EQ, "_int");
+            assert_cmpstr (allocator.new_name ("foo"), GLib.CompareOperator.EQ, "foo");
+            assert_cmpstr (allocator.new_name ("foo"), GLib.CompareOperator.EQ, "foo_2");
+            assert_cmpstr (allocator.new_name ("123abc"), GLib.CompareOperator.EQ, "_123abc");
         });
 
-        Test.add_func ("/valapoet/super_class_name_collision_resolution",() => {
-            var base_type = ClassName.get ("Framework.Core","Widget");
+        Test.add_func ("/valapoet/super_class_name_collision_resolution", () => {
+            var base_type = ClassName.get ("Framework.Core", "Widget");
             var derived_class = TypeSpec.class_builder ("Widget")
-                                 .add_modifiers (ValaModifier.PUBLIC)
-                                 .superclass (base_type)
-                                 .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (base_type)
+            .build ();
 
             var ui_namespace = TypeSpec.namespace_builder ("App.UI")
-                                .add_type (derived_class)
-                                .build ();
+            .add_type (derived_class)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (ui_namespace)
-                             .build ();
+            .add_type (ui_namespace)
+            .build ();
 
             string code = vala_file.to_string ();
             assert_true (code.contains ("public class Widget : Framework.Core.Widget"));

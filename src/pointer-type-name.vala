@@ -18,7 +18,7 @@
 
 namespace ValaPoet {
 
-/// Models a pointer to another type, such as `int*`.
+    /// Models a pointer to another type, such as `int*`.
     public class PointerTypeName : TypeName {
 
         public TypeName pointed_to_type { get; private set; }
@@ -28,11 +28,11 @@ namespace ValaPoet {
             this.annotations = new Gee.ArrayList<AttributeSpec>();
         }
 
-        public override string to_string() {
+        public override string to_string () {
             return pointed_to_type.to_string () + "*";
         }
 
-        public override TypeName copy() {
+        public override TypeName copy () {
             var copy = new PointerTypeName (this.pointed_to_type.copy ());
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;

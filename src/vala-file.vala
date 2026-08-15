@@ -32,18 +32,18 @@ namespace ValaPoet {
             this.usings.add_all (builder.usings);
         }
 
-        public void write_to(StringBuilder builder) {
-            var writer = new ValaWriter (builder,this.indent);
+        public void write_to (StringBuilder builder) {
+            var writer = new ValaWriter (builder, this.indent);
             writer.emit_file (this);
         }
 
-        public string to_string() {
+        public string to_string () {
             var builder = new StringBuilder ();
             write_to (builder);
             return builder.str;
         }
 
-        public static Builder builder() {
+        public static Builder builder () {
             return new Builder ();
         }
 
@@ -58,37 +58,37 @@ namespace ValaPoet {
                 this.usings = new Gee.HashSet<string>();
             }
 
-            public Builder add_type(TypeSpec type_spec) {
+            public Builder add_type (TypeSpec type_spec) {
                 this.members.add (type_spec);
                 return this;
             }
 
-            public Builder set_namespace(TypeSpec namespace_spec) {
+            public Builder set_namespace (TypeSpec namespace_spec) {
                 this.members.add (namespace_spec);
                 return this;
             }
 
-            public Builder add_method(MethodSpec method_spec) {
+            public Builder add_method (MethodSpec method_spec) {
                 this.members.add (method_spec);
                 return this;
             }
 
-            public Builder add_delegate(DelegateName delegate_spec) {
+            public Builder add_delegate (DelegateName delegate_spec) {
                 this.members.add (delegate_spec);
                 return this;
             }
 
-            public Builder add_using(string ns) {
+            public Builder add_using (string ns) {
                 this.usings.add (ns);
                 return this;
             }
 
-            public Builder indent(string indent) {
+            public Builder indent (string indent) {
                 this.indent_str = indent;
                 return this;
             }
 
-            public ValaFile build() {
+            public ValaFile build () {
                 return new ValaFile (this);
             }
 

@@ -36,7 +36,7 @@ namespace ValaPoet {
             this.initializer = builder.initializer_block;
         }
 
-        public static Builder builder(TypeName type_name, string name) {
+        public static Builder builder (TypeName type_name, string name) {
             return new Builder (type_name, name);
         }
 
@@ -54,20 +54,20 @@ namespace ValaPoet {
                 this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder initializer(string format, ...) {
+            public Builder initializer (string format, ...) {
                 var va = va_list ();
                 this.initializer_block = CodeBlock.of_valist (format, va);
                 return this;
             }
 
-            public FieldSpec build() {
+            public FieldSpec build () {
                 int memory_management_count = 0;
                 if (modifiers.contains (ValaModifier.OWNED))memory_management_count++;
                 if (modifiers.contains (ValaModifier.UNOWNED))memory_management_count++;

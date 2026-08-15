@@ -20,7 +20,8 @@ namespace ValaPoet {
 
     public class ParameterSpec : GLib.Object {
 
-        public enum Direction{
+
+        public enum Direction {
             IN,
             OUT,
             REF
@@ -39,15 +40,15 @@ namespace ValaPoet {
             this.type_name = builder.type_name;
             this.annotations = new Gee.ArrayList<AttributeSpec>();
             this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             this.modifiers.add_all (builder.modifiers);
             this.direction = builder.param_direction;
             this.default_value = builder.default_val;
             this.is_params = builder.is_params;
         }
 
-        public static Builder builder(TypeName type_name,string name) {
-            return new Builder (type_name,name);
+        public static Builder builder (TypeName type_name, string name) {
+            return new Builder (type_name, name);
         }
 
         public class Builder : GLib.Object {
@@ -59,41 +60,41 @@ namespace ValaPoet {
             public CodeBlock? default_val { get; private set; }
             public bool is_params { get; private set; }
 
-            public Builder (TypeName type_name,string name) {
+            public Builder (TypeName type_name, string name) {
                 this.type_name = type_name;
                 this.name = name;
                 this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
                 this.param_direction = Direction.IN;
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var mod in modifiers) {
                     if (mod != ValaModifier.OWNED && mod != ValaModifier.UNOWNED) {
-                        warning ("Adding unusual modifier '%s' to a parameter.",mod.to_string ());
+                        warning ("Adding unusual modifier '%s' to a parameter.", mod.to_string ());
                     }
                     this.modifiers.add (mod);
                 }
                 return this;
             }
 
-            public Builder direction(Direction dir) {
+            public Builder direction (Direction dir) {
                 this.param_direction = dir;
                 return this;
             }
 
-            public Builder default_value(string format,...) {
+            public Builder default_value (string format, ...) {
                 var va = va_list ();
-                this.default_val = CodeBlock.of_valist (format,va);
+                this.default_val = CodeBlock.of_valist (format, va);
                 return this;
             }
 
-            public Builder @params(bool is_params = true) {
+            public Builder @params (bool is_params = true) {
                 this.is_params = is_params;
                 return this;
             }
 
-            public ParameterSpec build() {
+            public ParameterSpec build () {
                 return new ParameterSpec (this);
             }
 

@@ -20,6 +20,7 @@ namespace ValaPoet {
 
     public class MethodSpec : GLib.Object {
 
+
         public enum Kind {
             METHOD,
             CONSTRUCTOR,
@@ -68,19 +69,19 @@ namespace ValaPoet {
             this.variadic = builder.is_variadic;
         }
 
-        public static Builder method_builder(string name) {
+        public static Builder method_builder (string name) {
             return new Builder (Kind.METHOD, name);
         }
 
-        public static Builder constructor_builder() {
+        public static Builder constructor_builder () {
             return new Builder (Kind.CONSTRUCTOR, "new");
         }
 
-        public static Builder named_constructor_builder(string name) {
+        public static Builder named_constructor_builder (string name) {
             return new Builder (Kind.NAMED_CONSTRUCTOR, name);
         }
 
-        public static Builder destructor_builder() {
+        public static Builder destructor_builder () {
             return new Builder (Kind.DESTRUCTOR, "~");
         }
 
@@ -115,120 +116,120 @@ namespace ValaPoet {
                 this.is_variadic = false;
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder add_type_variable(TypeVariableName tv) {
+            public Builder add_type_variable (TypeVariableName tv) {
                 this.type_variables.add (tv);
                 return this;
             }
 
-            public Builder add_attribute(AttributeSpec attribute) {
+            public Builder add_attribute (AttributeSpec attribute) {
                 this.annotations.add (attribute);
                 return this;
             }
 
-            public Builder add_valadoc(string format, ...) {
+            public Builder add_valadoc (string format, ...) {
                 var va = va_list ();
                 this.valadoc.add_valist (format, va);
                 return this;
             }
 
-            public Builder returns(TypeName return_type) {
+            public Builder returns (TypeName return_type) {
                 this.return_type = return_type;
                 return this;
             }
 
-            public Builder add_parameter(ParameterSpec parameter) {
+            public Builder add_parameter (ParameterSpec parameter) {
                 this.parameters.add (parameter);
                 return this;
             }
 
-            public Builder add_requires(string format, ...) {
+            public Builder add_requires (string format, ...) {
                 var va = va_list ();
                 this.requires_contracts.add (CodeBlock.of_valist (format, va));
                 return this;
             }
 
-            public Builder add_ensures(string format, ...) {
+            public Builder add_ensures (string format, ...) {
                 var va = va_list ();
                 this.ensures_contracts.add (CodeBlock.of_valist (format, va));
                 return this;
             }
 
-            public Builder add_statement(string format, ...) {
+            public Builder add_statement (string format, ...) {
                 var va = va_list ();
                 this.code.add_statement_valist (format, va);
                 return this;
             }
 
-            public Builder add_statement_raw(string code) {
+            public Builder add_statement_raw (string code) {
                 this.code.add_statement_raw (code);
                 return this;
             }
 
-            public Builder add_raw(string code) {
+            public Builder add_raw (string code) {
                 this.code.add_raw (code);
                 return this;
             }
 
-            public Builder begin_control_flow(string format, ...) {
+            public Builder begin_control_flow (string format, ...) {
                 var va = va_list ();
                 this.code.begin_control_flow_valist (format, va);
                 return this;
             }
 
-            public Builder next_control_flow(string format, ...) {
+            public Builder next_control_flow (string format, ...) {
                 var va = va_list ();
                 this.code.next_control_flow_valist (format, va);
                 return this;
             }
 
-            public Builder end_control_flow() {
+            public Builder end_control_flow () {
                 this.code.end_control_flow ();
                 return this;
             }
 
-            public Builder add_code(CodeBlock code_block) {
+            public Builder add_code (CodeBlock code_block) {
                 this.code.add_code (code_block);
                 return this;
             }
 
-            public Builder indent() {
+            public Builder indent () {
                 this.code.indent ();
                 return this;
             }
 
-            public Builder unindent() {
+            public Builder unindent () {
                 this.code.unindent ();
                 return this;
             }
 
-            public Builder set_variadic(bool variadic = true) {
+            public Builder set_variadic (bool variadic = true) {
                 this.is_variadic = variadic;
                 return this;
             }
 
-            public Builder add_throws(TypeName error_domain) {
+            public Builder add_throws (TypeName error_domain) {
                 this.throws_errs.add (error_domain);
                 return this;
             }
 
-            public Builder explicit_interface(TypeName interface_type) {
+            public Builder explicit_interface (TypeName interface_type) {
                 this.explicit_iface = interface_type;
                 return this;
             }
 
-            public MethodSpec build() {
+            public MethodSpec build () {
                 if (modifiers.contains (ValaModifier.ABSTRACT) && !code.is_empty ()) {
                     error ("abstract method cannot have code");
                 }
 
-                for (var i = 0 ; i < parameters.size ; i++) {
+                for (var i = 0; i < parameters.size; i++) {
                     if (parameters.get (i).is_params && i != parameters.size - 1) {
                         error ("The 'params' modifier can only be applied to the last parameter of a method.");
                     }

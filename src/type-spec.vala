@@ -18,11 +18,11 @@
 
 namespace ValaPoet {
 
-    public static uint vala_modifier_hash(ValaModifier m) {
+    public static uint vala_modifier_hash (ValaModifier m) {
         return (uint) m;
     }
 
-    public static bool vala_modifier_equal(ValaModifier a,ValaModifier b) {
+    public static bool vala_modifier_equal (ValaModifier a, ValaModifier b) {
         return a == b;
     }
 
@@ -31,7 +31,7 @@ namespace ValaPoet {
         public int? value { get; private set; }
         public CodeBlock? valadoc { get; private set; }
 
-        public EnumConstantSpec (string name,int? value = null,CodeBlock? valadoc = null) {
+        public EnumConstantSpec (string name, int? value = null, CodeBlock? valadoc = null) {
             this.name = name;
             this.value = value;
             this.valadoc = valadoc;
@@ -41,7 +41,8 @@ namespace ValaPoet {
 
     public class TypeSpec : GLib.Object {
 
-        public enum Kind{
+
+        public enum Kind {
             CLASS,
             STRUCT,
             INTERFACE,
@@ -74,7 +75,7 @@ namespace ValaPoet {
             this.name = builder.name;
             this.attributes = new Gee.ArrayList<AttributeSpec>();
             this.attributes.add_all (builder.attributes);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
             foreach (var m in builder.modifiers) {
                 this.modifiers.add (m);
             }
@@ -103,28 +104,28 @@ namespace ValaPoet {
             this.static_construct_block = builder.static_construct_code_block;
         }
 
-        public static Builder class_builder(string name) {
-            return new Builder (Kind.CLASS,name);
+        public static Builder class_builder (string name) {
+            return new Builder (Kind.CLASS, name);
         }
 
-        public static Builder struct_builder(string name) {
-            return new Builder (Kind.STRUCT,name);
+        public static Builder struct_builder (string name) {
+            return new Builder (Kind.STRUCT, name);
         }
 
-        public static Builder interface_builder(string name) {
-            return new Builder (Kind.INTERFACE,name);
+        public static Builder interface_builder (string name) {
+            return new Builder (Kind.INTERFACE, name);
         }
 
-        public static Builder enum_builder(string name) {
-            return new Builder (Kind.ENUM,name);
+        public static Builder enum_builder (string name) {
+            return new Builder (Kind.ENUM, name);
         }
 
-        public static Builder error_domain_builder(string name) {
-            return new Builder (Kind.ERROR_DOMAIN,name);
+        public static Builder error_domain_builder (string name) {
+            return new Builder (Kind.ERROR_DOMAIN, name);
         }
 
-        public static Builder namespace_builder(string name) {
-            return new Builder (Kind.NAMESPACE,name);
+        public static Builder namespace_builder (string name) {
+            return new Builder (Kind.NAMESPACE, name);
         }
 
         public class Builder : GLib.Object {
@@ -147,11 +148,11 @@ namespace ValaPoet {
             public CodeBlock? class_construct_code_block { get; private set; }
             public CodeBlock? static_construct_code_block { get; private set; }
 
-            public Builder (Kind kind,string name) {
+            public Builder (Kind kind, string name) {
                 this.kind = kind;
                 this.name = name;
                 this.attributes = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
                 this.valadoc = new CodeBlock.Builder ();
                 this.type_variables = new Gee.ArrayList<TypeVariableName>();
                 this.superinterfaces = new Gee.ArrayList<TypeName>();
@@ -164,90 +165,90 @@ namespace ValaPoet {
                 this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
             }
 
-            public Builder add_modifiers(params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params ValaModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
                 return this;
             }
 
-            public Builder add_type_variable(TypeVariableName type_variable) {
+            public Builder add_type_variable (TypeVariableName type_variable) {
                 this.type_variables.add (type_variable);
                 return this;
             }
 
-            public Builder add_error_code(string error_code) {
+            public Builder add_error_code (string error_code) {
                 this.error_codes.add (error_code);
                 return this;
             }
 
-            public Builder add_enum_constant(string name,int? value = null) {
-                this.enum_constants.add (new EnumConstantSpec (name,value));
+            public Builder add_enum_constant (string name, int? value = null) {
+                this.enum_constants.add (new EnumConstantSpec (name, value));
                 return this;
             }
 
-            public Builder add_enum_constant_spec(EnumConstantSpec enum_constant) {
+            public Builder add_enum_constant_spec (EnumConstantSpec enum_constant) {
                 this.enum_constants.add (enum_constant);
                 return this;
             }
 
-            public Builder add_attribute(AttributeSpec attribute) {
+            public Builder add_attribute (AttributeSpec attribute) {
                 this.attributes.add (attribute);
                 return this;
             }
 
-            public Builder add_valadoc(string format,...) {
+            public Builder add_valadoc (string format, ...) {
                 var va = va_list ();
-                this.valadoc.add_valist (format,va);
+                this.valadoc.add_valist (format, va);
                 return this;
             }
 
-            public Builder superclass(TypeName superclass) {
+            public Builder superclass (TypeName superclass) {
                 this.super_class = superclass;
                 return this;
             }
 
-            public Builder add_method(MethodSpec method) {
+            public Builder add_method (MethodSpec method) {
                 this.methods.add (method);
                 return this;
             }
 
-            public Builder add_field(FieldSpec field) {
+            public Builder add_field (FieldSpec field) {
                 this.fields.add (field);
                 return this;
             }
 
-            public Builder add_property(PropertySpec prop) {
+            public Builder add_property (PropertySpec prop) {
                 this.properties.add (prop);
                 return this;
             }
 
-            public Builder add_signal(SignalSpec signal) {
+            public Builder add_signal (SignalSpec signal) {
                 this.signals.add (signal);
                 return this;
             }
 
-            public Builder add_type(TypeSpec type) {
+            public Builder add_type (TypeSpec type) {
                 this.nested_types.add (type);
                 return this;
             }
 
-            public Builder set_construct_block(CodeBlock block) {
+            public Builder set_construct_block (CodeBlock block) {
                 this.construct_code_block = block;
                 return this;
             }
 
-            public Builder set_class_construct_block(CodeBlock block) {
+            public Builder set_class_construct_block (CodeBlock block) {
                 this.class_construct_code_block = block;
                 return this;
             }
 
-            public Builder set_static_construct_block(CodeBlock block) {
+            public Builder set_static_construct_block (CodeBlock block) {
                 this.static_construct_code_block = block;
                 return this;
             }
 
-            public TypeSpec build() {
+            public TypeSpec build () {
                 bool has_abstract_method = false;
                 foreach (var method in methods) {
                     if (method.modifiers.contains (ValaModifier.ABSTRACT)) {
@@ -266,8 +267,8 @@ namespace ValaPoet {
         }
     }
 
-    public enum ValaModifier{
-        // Access Modifiers (Start at 1 so PUBLIC is not (gpointer) 0/NULL in Gee collections)
+    public enum ValaModifier {
+    // Access Modifiers (Start at 1 so PUBLIC is not (gpointer) 0/NULL in Gee collections)
         PUBLIC = 1,
         PRIVATE,
         PROTECTED,

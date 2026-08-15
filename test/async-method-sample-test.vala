@@ -22,10 +22,10 @@ using ValaPoetTestUtil;
 
 public class AsyncMethodSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/async_method_sample",() => {
+        Test.add_func ("/valapoet/async_method_sample", () => {
             var expected = """public class NetworkClient : GLib.Object {
 	public unowned string get_endpoint () {
 		return "https://example.com";
@@ -40,37 +40,37 @@ public class AsyncMethodSampleTest : Object {
 }
 """;
             var get_endpoint = MethodSpec.method_builder ("get_endpoint")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .returns (TypeName.STRING.copy ().@unowned ())
-                                .add_statement ("return \"https://example.com\"")
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .returns (TypeName.STRING.copy ().@unowned ())
+            .add_statement ("return \"https://example.com\"")
+            .build ();
 
             var fetch_internal = MethodSpec.method_builder ("fetch_internal")
-                                  .add_modifiers (ValaModifier.PRIVATE,ValaModifier.ASYNC)
-                                  .add_throws (ClassName.get ("GLib","FileError"))
-                                  .add_throws (ClassName.get ("GLib","IOError"))
-                                  .build ();
+            .add_modifiers (ValaModifier.PRIVATE, ValaModifier.ASYNC)
+            .add_throws (ClassName.get ("GLib", "FileError"))
+            .add_throws (ClassName.get ("GLib", "IOError"))
+            .build ();
 
             var fetch_data = MethodSpec.method_builder ("fetch_data_async")
-                              .add_modifiers (ValaModifier.PUBLIC,ValaModifier.ASYNC)
-                              .add_throws (ClassName.get ("GLib","FileError"))
-                              .add_throws (ClassName.get ("GLib","IOError"))
-                              .add_statement ("yield fetch_internal ()")
-                              .build ();
+            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.ASYNC)
+            .add_throws (ClassName.get ("GLib", "FileError"))
+            .add_throws (ClassName.get ("GLib", "IOError"))
+            .add_statement ("yield fetch_internal ()")
+            .build ();
 
             var client_class = TypeSpec.class_builder ("NetworkClient")
-                                .add_modifiers (ValaModifier.PUBLIC)
-                                .superclass (TypeName.OBJECT)
-                                .add_method (get_endpoint)
-                                .add_method (fetch_internal)
-                                .add_method (fetch_data)
-                                .build ();
+            .add_modifiers (ValaModifier.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (get_endpoint)
+            .add_method (fetch_internal)
+            .add_method (fetch_data)
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_type (client_class)
-                             .build ();
+            .add_type (client_class)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 

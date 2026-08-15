@@ -21,9 +21,9 @@ using Gee;
 
 public class GeeListSampleTest : Object {
 
-    public static void main(string[] args) {
+    public static void main (string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/gee_list_sample",() => {
+        Test.add_func ("/valapoet/gee_list_sample", () => {
             var expected_output = """using Gee;
 
 void main () {
@@ -41,29 +41,29 @@ void main () {
 	stdout.printf ("%d\n", list[2]);
 }
 """;
-            var array_list_type = new ParameterizedTypeName.of (ClassName.get ("Gee","ArrayList"),TypeName.INT);
+            var array_list_type = new ParameterizedTypeName.of (ClassName.get ("Gee", "ArrayList"), TypeName.INT);
 
             var main_method = MethodSpec.method_builder ("main")
-                               .add_statement ("var list = new %T ()",array_list_type)
-                               .add_statement ("list.add (1)")
-                               .add_statement ("list.add (2)")
-                               .add_statement ("list.add (5)")
-                               .add_statement ("list.add (4)")
-                               .add_statement ("list.insert (2, 3)")
-                               .add_statement ("list.remove_at (3)")
-                               .begin_control_flow ("foreach (int i in list)")
-                               .add_statement ("stdout.printf (\"%d\\n\", i)")
-                               .end_control_flow ()
-                               .add_statement ("list[2] = 10")
-                               .add_statement ("stdout.printf (\"%d\\n\", list[2])")
-                               .build ();
+            .add_statement ("var list = new %T ()", array_list_type)
+            .add_statement ("list.add (1)")
+            .add_statement ("list.add (2)")
+            .add_statement ("list.add (5)")
+            .add_statement ("list.add (4)")
+            .add_statement ("list.insert (2, 3)")
+            .add_statement ("list.remove_at (3)")
+            .begin_control_flow ("foreach (int i in list)")
+            .add_statement ("stdout.printf (\"%d\\n\", i)")
+            .end_control_flow ()
+            .add_statement ("list[2] = 10")
+            .add_statement ("stdout.printf (\"%d\\n\", list[2])")
+            .build ();
 
             var vala_file = ValaFile.builder ()
-                             .add_using ("Gee")
-                             .add_method (main_method)
-                             .build ();
+            .add_using ("Gee")
+            .add_method (main_method)
+            .build ();
 
-            assert_true (vala_file.to_string () == expected_output);
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected_output);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
         Test.run ();
