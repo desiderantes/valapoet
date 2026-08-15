@@ -77,30 +77,31 @@ pkgconfig.generate(
 )
 
 if get_option('enable_valadoc')
-    valadoc = find_program('valadoc')
-    valapoet_docs = custom_target(
-        'valapoet_apidocs',
-        input: sources,
-        install: true,
-        # FIXME: Installing to tmp, so the target will be built
-        #        the problem is we cannot access a subfolder of the
-        #        buildtarget via the output parameter.
-        #        Find a nicer solution
-        install_dir: get_option('datadir') / 'devhelp' / 'books',
-        command: [
-            valadoc,
-            '-o',
-            meson.current_build_dir() / 'ValaPoet-' + API_VERSION,
-            '--doclet',
-            'devhelp',
-            '@INPUT@',
-            '--force',
-        ],
-        output: 'ValaPoet-' + API_VERSION,
-    )
-
-    install_subdir(
-        meson.current_build_dir() / 'ValaPoet-' + API_VERSION / 'ValaPoet-' + API_VERSION,
-        install_dir: get_option('datadir') / 'devhelp' / 'books',
-    )
+    valadoc = find_program('valadoc', required: false)
+    if valadoc.found()
+        valapoet_docs = custom_target(
+            'valapoet_apidocs',
+            input: sources,
+            output: 'ValaPoet-' + API_VERSION,
+            command: [
+                valadoc,
+                '-o',
+                meson.current_build_dir() / 'ValaPoet-' + API_VERSION,
+                '--doclet',
+                'devhelp',
+                '--pkg',
+                'gee-0.8',
+                '--pkg',
+                'gio-2.0',
+                '--pkg',
+                'glib-2.0',
+                '--pkg',
+                'gobject-2.0',
+                '--force',
+                '@INPUT@',
+            ],
+            install: true,
+            install_dir: get_option('datadir') / 'devhelp' / 'books',
+        )
+    endif
 endif

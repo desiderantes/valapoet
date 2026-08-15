@@ -20,10 +20,10 @@ using Gee;
 
 namespace ValaPoet {
     public interface Attributeatable {
-        public abstract List<AttributeSpec> attributes { get; }
+        public abstract Gee.List<AttributeSpec> attributes { get; }
 
         public interface Builder<T> {
-            public abstract List<AttributeSpec> attributes { get; }
+            public abstract Gee.List<AttributeSpec> attributes { get; }
 
             public Builder<T> add_attribute(AttributeSpec attribute_spec) {
                 attributes.add (attribute_spec);

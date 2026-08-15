@@ -27,4 +27,6 @@ add_project_arguments(
 g_ir_compiler = find_program('g-ir-compiler', required: false)
 
 subdir('src')
-subdir('test')
+if get_option('enable_tests')
+    subdir('test')
+endif
