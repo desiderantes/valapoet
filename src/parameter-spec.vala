@@ -1,0 +1,103 @@
+/*
+ * Copyright 2026 ValaPoet Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+namespace ValaPoet {
+
+    public class ParameterSpec : GLib.Object {
+
+        public enum Direction{
+            IN,
+            OUT,
+            REF
+        }
+
+        public string name { get; private set; }
+        public TypeName type_name { get; private set; }
+        public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
+        public Gee.HashSet<ValaModifier> modifiers { get; private set; }
+        public Direction direction { get; private set; }
+        public CodeBlock? default_value { get; private set; }
+        public bool is_params { get; private set; }
+
+        private ParameterSpec (Builder builder) {
+            this.name = builder.name;
+            this.type_name = builder.type_name;
+            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.annotations.add_all (builder.annotations);
+            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+            this.modifiers.add_all (builder.modifiers);
+            this.direction = builder.param_direction;
+            this.default_value = builder.default_val;
+            this.is_params = builder.is_params;
+        }
+
+        public static Builder builder(TypeName type_name,string name) {
+            return new Builder (type_name,name);
+        }
+
+        public class Builder : GLib.Object {
+            public string name { get; private set; }
+            public TypeName type_name { get; private set; }
+            public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
+            public Gee.HashSet<ValaModifier> modifiers { get; private set; }
+            public Direction param_direction { get; private set; }
+            public CodeBlock? default_val { get; private set; }
+            public bool is_params { get; private set; }
+
+            public Builder (TypeName type_name,string name) {
+                this.type_name = type_name;
+                this.name = name;
+                this.annotations = new Gee.ArrayList<AttributeSpec>();
+                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash,vala_modifier_equal);
+                this.param_direction = Direction.IN;
+            }
+
+            public Builder add_modifiers(params ValaModifier[] modifiers) {
+                foreach (var mod in modifiers) {
+                    if (mod != ValaModifier.OWNED && mod != ValaModifier.UNOWNED) {
+                        warning ("Adding unusual modifier '%s' to a parameter.",mod.to_string ());
+                    }
+                    this.modifiers.add (mod);
+                }
+                return this;
+            }
+
+            public Builder direction(Direction dir) {
+                this.param_direction = dir;
+                return this;
+            }
+
+            public Builder default_value(string format,...) {
+                var va = va_list ();
+                this.default_val = CodeBlock.of_valist (format,va);
+                return this;
+            }
+
+            public Builder @params(bool is_params = true) {
+                this.is_params = is_params;
+                return this;
+            }
+
+            public ParameterSpec build() {
+                return new ParameterSpec (this);
+            }
+
+        }
+    }
+
+}
