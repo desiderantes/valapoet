@@ -123,6 +123,62 @@ namespace ValaPoet {
                 return _object;
             }
         }
+
+        private static TypeName? _float = null;
+        public static TypeName FLOAT {
+            get {
+                if (_float == null)_float = new PrimitiveTypeName ("float");
+                return _float;
+            }
+        }
+
+        private static TypeName? _int32 = null;
+        public static TypeName INT32 {
+            get {
+                if (_int32 == null)_int32 = new PrimitiveTypeName ("int32");
+                return _int32;
+            }
+        }
+
+        private static TypeName? _uint32 = null;
+        public static TypeName UINT32 {
+            get {
+                if (_uint32 == null)_uint32 = new PrimitiveTypeName ("uint32");
+                return _uint32;
+            }
+        }
+
+        private static TypeName? _int64 = null;
+        public static TypeName INT64 {
+            get {
+                if (_int64 == null)_int64 = new PrimitiveTypeName ("int64");
+                return _int64;
+            }
+        }
+
+        private static TypeName? _uint64 = null;
+        public static TypeName UINT64 {
+            get {
+                if (_uint64 == null)_uint64 = new PrimitiveTypeName ("uint64");
+                return _uint64;
+            }
+        }
+
+        private static TypeName? _size_t = null;
+        public static TypeName SIZE_T {
+            get {
+                if (_size_t == null)_size_t = new PrimitiveTypeName ("size_t");
+                return _size_t;
+            }
+        }
+
+        private static TypeName? _ssize_t = null;
+        public static TypeName SSIZE_T {
+            get {
+                if (_ssize_t == null)_ssize_t = new PrimitiveTypeName ("ssize_t");
+                return _ssize_t;
+            }
+        }
     }
 
 // Internal class for representing primitives

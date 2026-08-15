@@ -44,7 +44,10 @@ namespace ValaPoet {
                 if (enclosing_class_name != null) {
                     return enclosing_class_name.canonical_name + "." + simple_name;
                 }
-                return namespace_name + "." + simple_name;
+                if (namespace_name != "") {
+                    return namespace_name + "." + simple_name;
+                }
+                return simple_name;
             }
         }
 

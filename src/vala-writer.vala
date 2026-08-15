@@ -33,6 +33,7 @@ namespace ValaPoet {
         private Gee.HashSet<string> usings;
         private bool is_dry_run = false;
         private Gee.HashSet<string> importable_types = new Gee.HashSet<string>();
+        private Gee.ArrayList<string> enclosing_type_names = new Gee.ArrayList<string>();
 
         public ValaWriter (StringBuilder@out,string indent = "\t",Gee.HashSet<string>? usings = null) {
             this.@out = @out;
@@ -109,6 +110,10 @@ namespace ValaPoet {
             emit_attributes (type_spec.attributes);
             emit_modifiers (type_spec.modifiers);
 
+            if (type_spec.kind != TypeSpec.Kind.NAMESPACE) {
+                enclosing_type_names.add (type_spec.name);
+            }
+
             switch (type_spec.kind) {
             case TypeSpec.Kind.CLASS :
                 emit ("class %s",type_spec.name);
@@ -175,6 +180,28 @@ namespace ValaPoet {
                 }
             }
 
+            // Emit enum constants if present
+            if (!type_spec.enum_constants.is_empty) {
+                bool has_members = !type_spec.methods.is_empty || !type_spec.fields.is_empty || !type_spec.properties.is_empty || !type_spec.nested_types.is_empty;
+                for (int i = 0 ; i < type_spec.enum_constants.size ; i++) {
+                    var c = type_spec.enum_constants.get (i);
+                    if (c.valadoc != null) {
+                        emit_code_block (c.valadoc);
+                    }
+                    emit ("%s", c.name);
+                    if (c.value != null) {
+                        emit (" = %d", c.value);
+                    }
+                    if (i < type_spec.enum_constants.size - 1) {
+                        emit (",\n");
+                    } else if (has_members) {
+                        emit (";\n");
+                    } else {
+                        emit ("\n");
+                    }
+                }
+            }
+
             // Emit construct blocks if present
             if (type_spec.static_construct_block != null) {
                 emit ("static construct {\n");
@@ -216,6 +243,10 @@ namespace ValaPoet {
             }
             foreach (var nested in type_spec.nested_types) {
                 emit_type_spec (nested);
+            }
+
+            if (type_spec.kind != TypeSpec.Kind.NAMESPACE && !enclosing_type_names.is_empty) {
+                enclosing_type_names.remove_at (enclosing_type_names.size - 1);
             }
 
             current_namespace = previous_ns;
@@ -521,7 +552,8 @@ namespace ValaPoet {
                     importable_types.add (cn.namespace_name);
                 }
                 res = cn.simple_name;
-                if (cn.namespace_name != "" && !usings.contains (cn.namespace_name) && current_namespace != cn.namespace_name) {
+                bool collides = cn.simple_name != "" && enclosing_type_names.contains (cn.simple_name);
+                if (collides || (cn.namespace_name != "" && !usings.contains (cn.namespace_name) && current_namespace != cn.namespace_name)) {
                     res = cn.canonical_name;
                 }
             } else if (type is ParameterizedTypeName) {

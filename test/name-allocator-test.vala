@@ -24,7 +24,7 @@ public class NameAllocatorTest : Object {
     public static void main(string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/name_allocator",() => {
+        Test.add_func ("/valapoet/name_allocator", () => {
             var allocator = new NameAllocator ();
             assert_true (allocator.new_name ("class") == "@class");
             assert_true (allocator.new_name ("class") == "@class_2");
@@ -33,6 +33,38 @@ public class NameAllocatorTest : Object {
             assert_true (allocator.new_name ("foo") == "foo");
             assert_true (allocator.new_name ("foo") == "foo_2");
             assert_true (allocator.new_name ("123abc") == "_123abc");
+        });
+
+        Test.add_func ("/valapoet/super_class_name_collision_resolution", () => {
+            var base_type = ClassName.get ("Framework.Core", "Widget");
+            var derived_class = TypeSpec.class_builder ("Widget")
+                                 .add_modifiers (ValaModifier.PUBLIC)
+                                 .superclass (base_type)
+                                 .build ();
+
+            var ui_namespace = TypeSpec.namespace_builder ("App.UI")
+                                .add_type (derived_class)
+                                .build ();
+
+            var vala_file = ValaFile.builder ()
+                             .add_type (ui_namespace)
+                             .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("public class Widget : Framework.Core.Widget"));
+            assert_false (code.contains ("public class Widget : Widget"));
+
+            string dummy_context = """
+            namespace Framework.Core {
+                public class Widget : GLib.Object {}
+            }
+
+            namespace App.UI {
+                public class Widget : Framework.Core.Widget {
+                }
+            }
+            """;
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (dummy_context));
         });
 
         Test.run ();

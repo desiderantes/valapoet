@@ -26,6 +26,18 @@ namespace ValaPoet {
         return a == b;
     }
 
+    public class EnumConstantSpec : GLib.Object {
+        public string name { get; private set; }
+        public int? value { get; private set; }
+        public CodeBlock? valadoc { get; private set; }
+
+        public EnumConstantSpec (string name, int? value = null, CodeBlock? valadoc = null) {
+            this.name = name;
+            this.value = value;
+            this.valadoc = valadoc;
+        }
+    }
+
     public class TypeSpec : GLib.Object {
 
         public enum Kind{
@@ -51,6 +63,7 @@ namespace ValaPoet {
         public Gee.ArrayList<SignalSpec> signals { get; private set; }
         public Gee.ArrayList<TypeSpec> nested_types { get; private set; }
         public Gee.ArrayList<string> error_codes { get; private set; }
+        public Gee.ArrayList<EnumConstantSpec> enum_constants { get; private set; }
         public CodeBlock? construct_block { get; private set; }
         public CodeBlock? class_construct_block { get; private set; }
         public CodeBlock? static_construct_block { get; private set; }
@@ -82,6 +95,8 @@ namespace ValaPoet {
             this.nested_types.add_all (builder.nested_types);
             this.error_codes = new Gee.ArrayList<string>();
             this.error_codes.add_all (builder.error_codes);
+            this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
+            this.enum_constants.add_all (builder.enum_constants);
             this.construct_block = builder.construct_code_block;
             this.class_construct_block = builder.class_construct_code_block;
             this.static_construct_block = builder.static_construct_code_block;
@@ -126,6 +141,7 @@ namespace ValaPoet {
             public Gee.ArrayList<SignalSpec> signals { get; private set; }
             public Gee.ArrayList<TypeSpec> nested_types { get; private set; }
             public Gee.ArrayList<string> error_codes { get; private set; }
+            public Gee.ArrayList<EnumConstantSpec> enum_constants { get; private set; }
             public CodeBlock? construct_code_block { get; private set; }
             public CodeBlock? class_construct_code_block { get; private set; }
             public CodeBlock? static_construct_code_block { get; private set; }
@@ -144,6 +160,7 @@ namespace ValaPoet {
                 this.signals = new Gee.ArrayList<SignalSpec>();
                 this.nested_types = new Gee.ArrayList<TypeSpec>();
                 this.error_codes = new Gee.ArrayList<string>();
+                this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
             }
 
             public Builder add_modifiers(params ValaModifier[] modifiers) {
@@ -160,6 +177,16 @@ namespace ValaPoet {
 
             public Builder add_error_code(string error_code) {
                 this.error_codes.add (error_code);
+                return this;
+            }
+
+            public Builder add_enum_constant(string name, int? value = null) {
+                this.enum_constants.add (new EnumConstantSpec (name, value));
+                return this;
+            }
+
+            public Builder add_enum_constant_spec(EnumConstantSpec enum_constant) {
+                this.enum_constants.add (enum_constant);
                 return this;
             }
 

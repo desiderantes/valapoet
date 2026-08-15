@@ -23,7 +23,7 @@ public class StringSampleTest : Object {
 
     public static void main(string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/string_sample",() => {
+        Test.add_func ("/valapoet/string_sample", () => {
             var expected_output = """void println (string str) {
 	stdout.printf ("%s\n", str);
 }
@@ -81,7 +81,7 @@ void main () {
 }
 """;
             var println_method = MethodSpec.method_builder ("println")
-                                  .add_parameter (ParameterSpec.builder (TypeName.STRING,"str").build ())
+                                  .add_parameter (ParameterSpec.builder (TypeName.STRING, "str").build ())
                                   .add_statement ("stdout.printf (\"%s\\n\", str)")
                                   .build ();
 
@@ -151,6 +151,30 @@ void main () {
             assert_true (vala_file.to_string () == expected_output);
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
+
+        Test.add_func ("/valapoet/raw_statement_literals", () => {
+            var print_method = MethodSpec.method_builder ("print_format")
+                                .add_modifiers (ValaModifier.PUBLIC)
+                                .add_statement_raw ("string text = \"%s = %d\".printf (\"item\", 42)")
+                                .add_statement_raw ("stdout.printf (\"%s\\n\", text)")
+                                .build ();
+
+            var test_class = TypeSpec.class_builder ("RawLiteralDemo")
+                              .add_modifiers (ValaModifier.PUBLIC)
+                              .superclass (TypeName.OBJECT)
+                              .add_method (print_method)
+                              .build ();
+
+            var vala_file = ValaFile.builder ()
+                             .add_type (test_class)
+                             .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("string text = \"%s = %d\".printf (\"item\", 42);"));
+            assert_true (code.contains ("stdout.printf (\"%s\\n\", text);"));
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (code));
+        });
+
         Test.run ();
     }
 

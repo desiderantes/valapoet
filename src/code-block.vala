@@ -132,6 +132,22 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_raw(string code) {
+                format_parts.add (code);
+                return this;
+            }
+
+            public Builder add_statement_raw(string code) {
+                add ("$[");
+                add_raw (code);
+                string trimmed = code.strip ();
+                if (!trimmed.has_suffix (";") && !trimmed.has_suffix (":") && !trimmed.has_suffix ("{") && !trimmed.has_suffix ("}")) {
+                    add (";");
+                }
+                add ("\n$]");
+                return this;
+            }
+
             public Builder begin_control_flow(string format, ...) {
                 var va = va_list ();
                 return begin_control_flow_valist (format, va);

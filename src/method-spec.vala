@@ -166,6 +166,16 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_statement_raw(string code) {
+                this.code.add_statement_raw (code);
+                return this;
+            }
+
+            public Builder add_raw(string code) {
+                this.code.add_raw (code);
+                return this;
+            }
+
             public Builder begin_control_flow(string format, ...) {
                 var va = va_list ();
                 this.code.begin_control_flow_valist (format, va);
