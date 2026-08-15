@@ -31,11 +31,12 @@ namespace ValaPoet {
         public int? value { get; private set; }
         public CodeBlock? valadoc { get; private set; }
 
-        public EnumConstantSpec (string name, int? value = null, CodeBlock? valadoc = null) {
+        public EnumConstantSpec (string name,int? value = null,CodeBlock? valadoc = null) {
             this.name = name;
             this.value = value;
             this.valadoc = valadoc;
         }
+
     }
 
     public class TypeSpec : GLib.Object {
@@ -180,8 +181,8 @@ namespace ValaPoet {
                 return this;
             }
 
-            public Builder add_enum_constant(string name, int? value = null) {
-                this.enum_constants.add (new EnumConstantSpec (name, value));
+            public Builder add_enum_constant(string name,int? value = null) {
+                this.enum_constants.add (new EnumConstantSpec (name,value));
                 return this;
             }
 

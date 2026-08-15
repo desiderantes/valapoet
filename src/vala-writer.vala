@@ -188,9 +188,9 @@ namespace ValaPoet {
                     if (c.valadoc != null) {
                         emit_code_block (c.valadoc);
                     }
-                    emit ("%s", c.name);
+                    emit ("%s",c.name);
                     if (c.value != null) {
-                        emit (" = %d", c.value);
+                        emit (" = %d",c.value);
                     }
                     if (i < type_spec.enum_constants.size - 1) {
                         emit (",\n");
@@ -241,8 +241,12 @@ namespace ValaPoet {
                 }
                 emit_method (type_spec.methods.get (i),type_spec.name);
             }
-            foreach (var nested in type_spec.nested_types) {
-                emit_type_spec (nested);
+            // Emit nested types with proper newline spacing between definitions
+            for (int i = 0 ; i < type_spec.nested_types.size ; i++) {
+                if (i > 0 || !type_spec.methods.is_empty || !type_spec.fields.is_empty || !type_spec.properties.is_empty) {
+                    emit ("\n");
+                }
+                emit_type_spec (type_spec.nested_types.get (i));
             }
 
             if (type_spec.kind != TypeSpec.Kind.NAMESPACE && !enclosing_type_names.is_empty) {

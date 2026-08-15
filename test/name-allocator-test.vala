@@ -24,7 +24,7 @@ public class NameAllocatorTest : Object {
     public static void main(string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/name_allocator", () => {
+        Test.add_func ("/valapoet/name_allocator",() => {
             var allocator = new NameAllocator ();
             assert_true (allocator.new_name ("class") == "@class");
             assert_true (allocator.new_name ("class") == "@class_2");
@@ -35,8 +35,8 @@ public class NameAllocatorTest : Object {
             assert_true (allocator.new_name ("123abc") == "_123abc");
         });
 
-        Test.add_func ("/valapoet/super_class_name_collision_resolution", () => {
-            var base_type = ClassName.get ("Framework.Core", "Widget");
+        Test.add_func ("/valapoet/super_class_name_collision_resolution",() => {
+            var base_type = ClassName.get ("Framework.Core","Widget");
             var derived_class = TypeSpec.class_builder ("Widget")
                                  .add_modifiers (ValaModifier.PUBLIC)
                                  .superclass (base_type)

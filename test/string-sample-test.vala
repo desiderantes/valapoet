@@ -23,7 +23,7 @@ public class StringSampleTest : Object {
 
     public static void main(string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/string_sample", () => {
+        Test.add_func ("/valapoet/string_sample",() => {
             var expected_output = """void println (string str) {
 	stdout.printf ("%s\n", str);
 }
@@ -81,7 +81,7 @@ void main () {
 }
 """;
             var println_method = MethodSpec.method_builder ("println")
-                                  .add_parameter (ParameterSpec.builder (TypeName.STRING, "str").build ())
+                                  .add_parameter (ParameterSpec.builder (TypeName.STRING,"str").build ())
                                   .add_statement ("stdout.printf (\"%s\\n\", str)")
                                   .build ();
 
@@ -152,7 +152,7 @@ void main () {
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
-        Test.add_func ("/valapoet/raw_statement_literals", () => {
+        Test.add_func ("/valapoet/raw_statement_literals",() => {
             var print_method = MethodSpec.method_builder ("print_format")
                                 .add_modifiers (ValaModifier.PUBLIC)
                                 .add_statement_raw ("string text = \"%s = %d\".printf (\"item\", 42)")

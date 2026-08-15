@@ -69,6 +69,26 @@ public class CompactNode {
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
+        Test.add_func ("/valapoet/nested_type_newline_spacing",() => {
+            var inner_class = TypeSpec.class_builder ("Inner")
+                               .add_modifiers (ValaModifier.PUBLIC)
+                               .build ();
+
+            var outer_class = TypeSpec.class_builder ("Outer")
+                               .add_modifiers (ValaModifier.PUBLIC)
+                               .add_field (FieldSpec.builder (TypeName.INT,"val").add_modifiers (ValaModifier.PUBLIC).build ())
+                               .add_type (inner_class)
+                               .build ();
+
+            var vala_file = ValaFile.builder ()
+                             .add_type (outer_class)
+                             .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("public int val;\n\n\tpublic class Inner {"));
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (code));
+        });
+
         Test.run ();
     }
 

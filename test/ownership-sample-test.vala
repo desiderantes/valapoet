@@ -25,7 +25,7 @@ public class OwnershipSampleTest : Object {
     public static void main(string[] args) {
         Test.init (ref args);
 
-        Test.add_func ("/valapoet/ownership_sample", () => {
+        Test.add_func ("/valapoet/ownership_sample",() => {
             var expected = """public class Node : GLib.Object {
 	public weak Node? parent;
 	public string data;
@@ -38,19 +38,19 @@ public class OwnershipSampleTest : Object {
 	}
 }
 """;
-            var parent_type = ClassName.get ("", "Node").copy ();
+            var parent_type = ClassName.get ("","Node").copy ();
             parent_type.is_weak = true;
             parent_type.is_nullable = true;
 
-            var parent_field = FieldSpec.builder (parent_type, "parent")
+            var parent_field = FieldSpec.builder (parent_type,"parent")
                                 .add_modifiers (ValaModifier.PUBLIC)
                                 .build ();
 
-            var data_field = FieldSpec.builder (TypeName.STRING, "data")
+            var data_field = FieldSpec.builder (TypeName.STRING,"data")
                               .add_modifiers (ValaModifier.PUBLIC)
                               .build ();
 
-            var unowned_ret_type = ClassName.get ("", "Node").copy ();
+            var unowned_ret_type = ClassName.get ("","Node").copy ();
             unowned_ret_type.is_unowned = true;
 
             var get_parent_method = MethodSpec.method_builder ("get_parent")
@@ -62,7 +62,7 @@ public class OwnershipSampleTest : Object {
             var owned_param_type = TypeName.STRING.copy ();
             owned_param_type.is_owned = true;
 
-            var set_data_param = ParameterSpec.builder (owned_param_type, "data").build ();
+            var set_data_param = ParameterSpec.builder (owned_param_type,"data").build ();
 
             var set_data_method = MethodSpec.method_builder ("set_node_data")
                                    .add_modifiers (ValaModifier.PUBLIC)
@@ -85,7 +85,7 @@ public class OwnershipSampleTest : Object {
 
             var actual = vala_file.to_string ();
             if (actual != expected) {
-                stdout.printf ("ACTUAL:\n'%s'\nEXPECTED:\n'%s'\n", actual, expected);
+                stdout.printf ("ACTUAL:\n'%s'\nEXPECTED:\n'%s'\n",actual,expected);
             }
             assert_true (actual == expected);
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));

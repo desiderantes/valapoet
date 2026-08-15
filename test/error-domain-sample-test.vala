@@ -23,7 +23,7 @@ public class ErrorDomainSampleTest : Object {
 
     public static void main(string[] args) {
         Test.init (ref args);
-        Test.add_func ("/valapoet/error_domain_sample", () => {
+        Test.add_func ("/valapoet/error_domain_sample",() => {
             var expected = """public errordomain FileError {
 	NOT_FOUND,
 	PERMISSION_DENIED
@@ -43,7 +43,7 @@ public class ErrorDomainSampleTest : Object {
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
-        Test.add_func ("/valapoet/enum_constant_spec", () => {
+        Test.add_func ("/valapoet/enum_constant_spec",() => {
             var to_string_method = MethodSpec.method_builder ("to_string_name")
                                     .add_modifiers (ValaModifier.PUBLIC)
                                     .returns (TypeName.STRING)
@@ -52,9 +52,9 @@ public class ErrorDomainSampleTest : Object {
 
             var status_enum = TypeSpec.enum_builder ("LogLevel")
                                .add_modifiers (ValaModifier.PUBLIC)
-                               .add_enum_constant ("DEBUG", 0)
-                               .add_enum_constant ("INFO", 1)
-                               .add_enum_constant ("ERROR", 2)
+                               .add_enum_constant ("DEBUG",0)
+                               .add_enum_constant ("INFO",1)
+                               .add_enum_constant ("ERROR",2)
                                .add_method (to_string_method)
                                .build ();
 
