@@ -48,19 +48,19 @@ public class ConstructorsDestructorsSampleTest : Object {
 }
 """;
             var name_field = FieldSpec.builder (TypeName.STRING, "name")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .build ();
 
             var static_block = CodeBlock.builder ().add_statement ("stdout.printf (\"Static initialized\\n\")").build ();
             var instance_block = CodeBlock.builder ().add_statement ("stdout.printf (\"Object constructed\\n\")").build ();
 
             var default_ctor = MethodSpec.constructor_builder ()
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_statement ("this.name = \"default\"")
             .build ();
 
             var named_ctor = MethodSpec.named_constructor_builder ("with_name")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.STRING, "name").build ())
             .add_statement ("this.name = name")
             .build ();
@@ -70,7 +70,7 @@ public class ConstructorsDestructorsSampleTest : Object {
             .build ();
 
             var widget_class = TypeSpec.class_builder ("Widget")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_field (name_field)
             .set_static_construct_block (static_block)

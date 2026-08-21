@@ -20,7 +20,6 @@ namespace ValaPoet {
 
     public class MethodSpec : GLib.Object {
 
-
         public enum Kind {
             METHOD,
             CONSTRUCTOR,
@@ -32,7 +31,6 @@ namespace ValaPoet {
         public string name { get; private set; }
         public CodeBlock valadoc { get; private set; }
         public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-        public Gee.HashSet<ValaModifier> modifiers { get; private set; }
         public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
         public TypeName ? return_type { get; private set; }
         public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
@@ -41,18 +39,19 @@ namespace ValaPoet {
         public CodeBlock code { get; private set; }
         public Gee.ArrayList<TypeName> throws_errors { get; private set; }
         public TypeName ? explicit_interface { get; private set; }
+        public Visibility visibility { get; private set; }
+        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
         public bool variadic { get; private set; }
 
         private MethodSpec (Builder builder) {
             this.kind = builder.kind;
             this.name = builder.name;
+            this.visibility = builder.vis;
             this.valadoc = builder.valadoc.build ();
             this.annotations = new Gee.ArrayList<AttributeSpec>();
             this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
-            foreach (var m in builder.modifiers) {
-                this.modifiers.add (m);
-            }
+            this.modifiers = new Gee.HashSet<SymbolModifier>();
+            this.modifiers.add_all (builder.modifiers);
             this.type_variables = new Gee.ArrayList<TypeVariableName>();
             this.type_variables.add_all (builder.type_variables);
             this.return_type = builder.return_type;
@@ -90,7 +89,8 @@ namespace ValaPoet {
             public string name { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
             public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-            public Gee.HashSet<ValaModifier> modifiers { get; private set; }
+            public Visibility vis { get; private set; }
+            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
             public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
             public TypeName ? return_type { get; private set; }
             public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
@@ -104,9 +104,10 @@ namespace ValaPoet {
             public Builder (Kind kind, string name) {
                 this.kind = kind;
                 this.name = name;
+                this.vis = Visibility.NONE;
                 this.valadoc = new CodeBlock.Builder ();
                 this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<SymbolModifier>();
                 this.type_variables = new Gee.ArrayList<TypeVariableName>();
                 this.parameters = new Gee.ArrayList<ParameterSpec>();
                 this.requires_contracts = new Gee.ArrayList<CodeBlock>();
@@ -116,10 +117,15 @@ namespace ValaPoet {
                 this.is_variadic = false;
             }
 
-            public Builder add_modifiers (params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
+                return this;
+            }
+
+            public Builder visibility (Visibility vis) {
+                this.vis = vis;
                 return this;
             }
 
@@ -225,7 +231,13 @@ namespace ValaPoet {
             }
 
             public MethodSpec build () {
-                if (modifiers.contains (ValaModifier.ABSTRACT) && !code.is_empty ()) {
+                foreach (var m in modifiers) {
+                    if (!m.targets_method ()) {
+                        warning ("Modifier '%s' is not applicable to methods.", m.to_string ());
+                    }
+                }
+
+                if (modifiers.contains (SymbolModifier.ABSTRACT) && !code.is_empty ()) {
                     error ("abstract method cannot have code");
                 }
 

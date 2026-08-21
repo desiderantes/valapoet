@@ -16,163 +16,174 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-using ValaPoet.Utils;
-
 namespace ValaPoet {
-    public enum Modifier {
-        PRIVATE,
+
+    public enum Target {
+        CLASS,
+        STRUCT,
+        INTERFACE,
+        METHOD,
+        PROPERTY,
+        FIELD,
+        SIGNAL,
+        DELEGATE,
+        ENUM,
+        CONSTRUCT
+    }
+
+    public enum Visibility {
+        NONE,
         PUBLIC,
+        PRIVATE,
         PROTECTED,
-        INTERNAL,
-        SEALED,
+        INTERNAL;
 
-        OUT,
-        REF,
-
-        CONST,
-        OWNED,
-        UNOWNED,
-        WEAK,
-
-        ABSTRACT,
-        VIRTUAL,
-        OVERRIDE,
-        EXTERN,
-        STATIC,
-        ASYNC,
-        INLINE,
-        NEW,
-
-        CONSTRUCT,
-
-        NULLABLE;
-
-    public bool applies_to (Target target) {
-        return ModifierCompanion.target_map[this].contains (target);
-    }
-
-    public Set<Target> get_targets () {
-        return ModifierCompanion.target_map[this].read_only_view;
-    }
-
-    public Set<Modifier> get_visibility_modifiers () {
-        return ModifierCompanion.VISIBILITY_MODIFIERS;
-    }
-
-    public string to_string () {
-        switch (this) {
-            case PRIVATE:
-                return "private";
+        public string to_string () {
+            switch (this) {
             case PUBLIC:
                 return "public";
+            case PRIVATE:
+                return "private";
             case PROTECTED:
                 return "protected";
             case INTERNAL:
                 return "internal";
+            default:
+                return "";
+            }
+        }
+    }
+
+    public enum SymbolModifier {
+        NONE,
+        STATIC,
+        ABSTRACT,
+        VIRTUAL,
+        OVERRIDE,
+        SEALED,
+        EXTERN,
+        INLINE,
+        ASYNC,
+        NEW,
+        CONST;
+
+        public bool applies_to (Target target) {
+            switch (this) {
+            case ABSTRACT:
+                return target == Target.CLASS || target == Target.INTERFACE || target == Target.METHOD || target == Target.PROPERTY;
+            case VIRTUAL:
+            case OVERRIDE:
+                return target == Target.METHOD || target == Target.PROPERTY;
+            case STATIC:
+                return target == Target.CLASS || target == Target.METHOD || target == Target.FIELD || target == Target.PROPERTY || target == Target.CONSTRUCT;
             case SEALED:
-                return "sealed";
-
-            case OUT:
-                return "out";
-            case REF:
-                return "ref";
-
+                return target == Target.CLASS;
+            case ASYNC:
+                return target == Target.METHOD || target == Target.DELEGATE;
+            case INLINE:
+                return target == Target.METHOD;
+            case EXTERN:
+                return target == Target.METHOD || target == Target.FIELD || target == Target.DELEGATE;
             case CONST:
-                return "const";
-            case OWNED:
-                return "owned";
-            case UNOWNED:
-                return "unowned";
-            case WEAK:
-                return "weak";
+                return target == Target.METHOD || target == Target.FIELD;
+            case NEW:
+                return target == Target.METHOD || target == Target.PROPERTY || target == Target.FIELD;
+            default:
+                return false;
+            }
+        }
 
+        public bool targets_method () {
+            return applies_to (Target.METHOD);
+        }
+
+        public bool targets_class () {
+            return applies_to (Target.CLASS);
+        }
+
+        public bool targets_interface () {
+            return applies_to (Target.INTERFACE);
+        }
+
+        public bool targets_property () {
+            return applies_to (Target.PROPERTY);
+        }
+
+        public bool targets_field () {
+            return applies_to (Target.FIELD);
+        }
+
+        public bool targets_signal () {
+            return applies_to (Target.SIGNAL);
+        }
+
+        public bool targets_delegate () {
+            return applies_to (Target.DELEGATE);
+        }
+
+        public string to_string () {
+            switch (this) {
+            case STATIC:
+                return "static";
             case ABSTRACT:
                 return "abstract";
             case VIRTUAL:
                 return "virtual";
             case OVERRIDE:
                 return "override";
+            case SEALED:
+                return "sealed";
             case EXTERN:
                 return "extern";
-            case STATIC:
-                return "static";
-            case ASYNC:
-                return "async";
             case INLINE:
                 return "inline";
+            case ASYNC:
+                return "async";
             case NEW:
                 return "new";
-
-            case CONSTRUCT:
-                return "construct";
-
-            case NULLABLE:
-                return "?";
+            case CONST:
+                return "const";
             default:
-                assert_not_reached ();
+                return "";
+            }
         }
     }
 
+    public enum Ownership {
+        NONE,
+        OWNED,
+        UNOWNED,
+        WEAK;
+
+        public string to_string () {
+            switch (this) {
+            case OWNED:
+                return "owned";
+            case UNOWNED:
+                return "unowned";
+            case WEAK:
+                return "weak";
+            default:
+                return "";
+            }
+        }
     }
 
-    public enum Target {
-        ENUM,
-        SIGNAL,
-        ERRORDOMAIN,
-        STRUCT,
-        DELEGATE,
-        CLASS,
-        METHOD,
-        PROPERTY,
-        PARAMETER,
-        FIELD,
-        TYPE,
-        GETTER_SETTER
+    public enum ParameterDirection {
+        IN,
+        OUT,
+        REF;
+
+        public string to_string () {
+            switch (this) {
+            case OUT:
+                return "out";
+            case REF:
+                return "ref";
+            default:
+                return "";
+            }
+        }
     }
 
-    internal class ModifierCompanion {
-        internal static Gee.Map<Modifier, Set<Target> > target_map = Utils.map_of<Modifier, Set<Target> > ({
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.PRIVATE, Utils.set_of<Target> ({
-                                                                                                                                                                                            Target.CLASS, Target.ENUM, Target.SIGNAL, Target.ERRORDOMAIN, Target.STRUCT, Target.DELEGATE,
-                                                                                                                                                                                            Target.METHOD, Target.PROPERTY, Target.FIELD, Target.GETTER_SETTER
-                                                                                                                                                                                        })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.PUBLIC, Utils.set_of<Target> ({
-                                                                                                                                                                                           Target.CLASS, Target.ENUM, Target.SIGNAL, Target.ERRORDOMAIN, Target.STRUCT, Target.DELEGATE,
-                                                                                                                                                                                           Target.METHOD, Target.PROPERTY, Target.FIELD, Target.GETTER_SETTER
-                                                                                                                                                                                       })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.PROTECTED, Utils.set_of<Target> ({
-                                                                                                                                                                                              Target.CLASS, Target.ENUM, Target.SIGNAL, Target.ERRORDOMAIN, Target.STRUCT, Target.DELEGATE,
-                                                                                                                                                                                              Target.METHOD, Target.PROPERTY, Target.FIELD, Target.GETTER_SETTER
-                                                                                                                                                                                          })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.INTERNAL, Utils.set_of<Target> ({
-                                                                                                                                                                                             Target.CLASS, Target.ENUM, Target.SIGNAL, Target.ERRORDOMAIN, Target.STRUCT, Target.DELEGATE,
-                                                                                                                                                                                             Target.METHOD, Target.PROPERTY, Target.FIELD
-                                                                                                                                                                                         })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.SEALED, Utils.set_of<Target> ({ Target.CLASS })),
-
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.OUT, Utils.set_of<Target> ({ Target.PARAMETER, Target.TYPE })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.REF, Utils.set_of<Target> ({ Target.PARAMETER, Target.TYPE })),
-
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.CONST, Utils.set_of<Target> ({ Target.METHOD, Target.DELEGATE, Target.FIELD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.OWNED, Utils.set_of<Target> ({ Target.PARAMETER, Target.FIELD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.UNOWNED, Utils.set_of<Target> ({ Target.PARAMETER, Target.FIELD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.WEAK, Utils.set_of<Target> ({ Target.PARAMETER, Target.FIELD })),
-
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.ABSTRACT, Utils.set_of<Target> ({ Target.CLASS, Target.METHOD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.VIRTUAL, Utils.set_of<Target> ({ Target.METHOD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.OVERRIDE, Utils.set_of<Target> ({ Target.METHOD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.EXTERN, Utils.set_of<Target> ({ Target.METHOD, Target.DELEGATE, Target.FIELD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.STATIC, Utils.set_of<Target> ({ Target.METHOD, Target.DELEGATE, Target.FIELD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.ASYNC, Utils.set_of<Target> ({ Target.METHOD, Target.DELEGATE })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.INLINE, Utils.set_of<Target> ({ Target.METHOD })),
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.NEW, Utils.set_of<Target> ({ Target.METHOD })),
-
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.CONSTRUCT, Utils.set_of<Target> ({ Target.GETTER_SETTER })),
-
-                                                                                                               new Pair<Modifier, Set<Target> >(Modifier.NULLABLE, Utils.set_of<Target> ({ Target.TYPE }))
-                                                                                                           }).read_only_view;
-
-        public static Set<Modifier> VISIBILITY_MODIFIERS = Utils.set_of<Modifier> ({ Modifier.PUBLIC, Modifier.INTERNAL, Modifier.PROTECTED, Modifier.PRIVATE }).read_only_view;
-    }
 }

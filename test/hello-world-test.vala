@@ -36,14 +36,14 @@ public class HelloWorldTest : Object {
 """;
 
             var main_method = MethodSpec.method_builder ("main")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.STATIC)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.STATIC)
             .returns (TypeName.VOID)
             .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args").build ())
             .add_statement ("stdout.printf (\"Hello, World\\n\")")
             .build ();
 
             var hello_world_class = TypeSpec.class_builder ("HelloWorld")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (main_method)
             .build ();

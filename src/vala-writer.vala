@@ -108,7 +108,8 @@ namespace ValaPoet {
         public void emit_type_spec (TypeSpec type_spec) {
             emit_valadoc (type_spec.valadoc);
             emit_attributes (type_spec.attributes);
-            emit_modifiers (type_spec.modifiers);
+            emit_visibility (type_spec.visibility);
+            emit_symbol_modifiers (type_spec.modifiers);
 
             if (type_spec.kind != TypeSpec.Kind.NAMESPACE) {
                 enclosing_type_names.add (type_spec.name);
@@ -260,8 +261,11 @@ namespace ValaPoet {
 
         public void emit_property (PropertySpec prop_spec) {
             emit_attributes (prop_spec.attributes);
-            emit_modifiers (prop_spec.modifiers);
-            emit ("%s %s", lookup_name (prop_spec.type_name), prop_spec.name);
+            emit_visibility (prop_spec.visibility);
+            emit_symbol_modifiers (prop_spec.modifiers);
+            var unowned_type = prop_spec.type_name.copy ();
+            unowned_type.is_owned = false;
+            emit ("%s %s", lookup_name (unowned_type), prop_spec.name);
             emit (" {\n");
             increase_indent ();
 
@@ -269,25 +273,38 @@ namespace ValaPoet {
 
             if (!has_bodies) {
             // Auto property with optional getter/setter modifiers
-                emit_modifiers (prop_spec.get_modifiers);
-                emit ("get; ");
-                emit_modifiers (prop_spec.set_modifiers);
-                emit ("set;");
+                if (prop_spec.type_name.is_owned) {
+                    emit ("owned ");
+                }
+                emit_visibility (prop_spec.get_visibility);
+                emit_symbol_modifiers (prop_spec.get_modifiers);
+                emit ("get;");
+                if (prop_spec.is_construct_only) {
+                    emit (" construct;");
+                } else if (!prop_spec.is_read_only) {
+                    emit (" ");
+                    emit_visibility (prop_spec.set_visibility);
+                    emit_symbol_modifiers (prop_spec.set_modifiers);
+                    emit ("set;");
+                }
+                emit ("\n");
             } else {
                 if (prop_spec.get_body != null) {
-                    emit_modifiers (prop_spec.get_modifiers);
+                    if (prop_spec.type_name.is_owned) {
+                        emit ("owned ");
+                    }
+                    emit_visibility (prop_spec.get_visibility);
+                    emit_symbol_modifiers (prop_spec.get_modifiers);
                     emit ("get {\n");
                     increase_indent ();
                     emit_code_block (prop_spec.get_body);
                     decrease_indent ();
                     emit ("}\n");
-                } else {
-                    emit_modifiers (prop_spec.get_modifiers);
-                    emit ("get;\n");
                 }
 
                 if (prop_spec.set_body != null) {
-                    emit_modifiers (prop_spec.set_modifiers);
+                    emit_visibility (prop_spec.set_visibility);
+                    emit_symbol_modifiers (prop_spec.set_modifiers);
                     emit ("set {\n");
                     increase_indent ();
                     emit_code_block (prop_spec.set_body);
@@ -305,17 +322,15 @@ namespace ValaPoet {
             }
 
             if (prop_spec.is_construct_set) {
-                emit (" construct set;");
+                emit ("construct set;\n");
             }
 
             if (prop_spec.default_value != null) {
-                emit (" default = ");
+                emit ("default = ");
                 emit_code_block (prop_spec.default_value);
-                emit (";");
+                emit (";\n");
             }
-            if (!has_bodies) {
-                emit ("\n");
-            }
+
             decrease_indent ();
             emit ("}\n");
         }
@@ -323,7 +338,8 @@ namespace ValaPoet {
         public void emit_method (MethodSpec method_spec, string enclosing_name = "") {
             emit_valadoc (method_spec.valadoc);
             emit_attributes (method_spec.annotations);
-            emit_modifiers (method_spec.modifiers);
+            emit_visibility (method_spec.visibility);
+            emit_symbol_modifiers (method_spec.modifiers);
 
             if (method_spec.kind == MethodSpec.Kind.METHOD) {
                 if (method_spec.return_type != null) {
@@ -357,11 +373,11 @@ namespace ValaPoet {
             for (int i = 0; i < method_spec.parameters.size; i++) {
                 if (i > 0)emit (", ");
                 var param = method_spec.parameters.get (i);
-                emit_attributes (param.annotations);
-                emit_modifiers (param.modifiers);
-                if (param.direction == ParameterSpec.Direction.OUT) {
+                emit_attributes (param.annotations, true);
+                emit_symbol_modifiers (param.modifiers);
+                if (param.direction == ParameterDirection.OUT) {
                     emit ("out ");
-                } else if (param.direction == ParameterSpec.Direction.REF) {
+                } else if (param.direction == ParameterDirection.REF) {
                     emit ("ref ");
                 }
                 if (param.is_params) {
@@ -408,7 +424,7 @@ namespace ValaPoet {
                 }
             }
 
-            if (method_spec.modifiers.contains (ValaModifier.ABSTRACT)) {
+            if (method_spec.modifiers.contains (SymbolModifier.ABSTRACT)) {
                 emit (";\n");
             } else {
                 emit (" {\n");
@@ -421,7 +437,8 @@ namespace ValaPoet {
 
         public void emit_signal (SignalSpec signal_spec) {
             emit_attributes (signal_spec.attributes);
-            emit_modifiers (signal_spec.modifiers);
+            emit_visibility (signal_spec.visibility);
+            emit_symbol_modifiers (signal_spec.modifiers);
             emit ("signal ");
             if (signal_spec.return_type != null) {
                 emit ("%s ", lookup_name (signal_spec.return_type));
@@ -432,6 +449,7 @@ namespace ValaPoet {
             for (int i = 0; i < signal_spec.parameters.size; i++) {
                 if (i > 0)emit (", ");
                 var p = signal_spec.parameters.get (i);
+                emit_attributes (p.annotations, true);
                 emit ("%s %s", lookup_name (p.type_name), p.name);
             }
             emit (");\n");
@@ -439,7 +457,8 @@ namespace ValaPoet {
 
         public void emit_field (FieldSpec field_spec) {
             emit_attributes (field_spec.annotations);
-            emit_modifiers (field_spec.modifiers);
+            emit_visibility (field_spec.visibility);
+            emit_symbol_modifiers (field_spec.modifiers);
             emit ("%s %s", lookup_name (field_spec.type_name), field_spec.name);
             if (field_spec.initializer != null) {
                 emit (" = ");
@@ -463,30 +482,49 @@ namespace ValaPoet {
             emit (" */\n");
         }
 
-        public void emit_attributes (Gee.ArrayList<AttributeSpec> attributes) {
-            foreach (var attr in attributes) {
-                emit ("[%s", attr.name);
-                if (!attr.arguments.is_empty) {
-                    emit ("(");
-                    int idx = 0;
-                    foreach (var entry in attr.arguments.entries) {
-                        if (idx > 0)emit (", ");
-                        emit ("%s = ", entry.key);
-                        emit_code_block (entry.value);
-                        idx++;
-                    }
-                    emit (")");
+        public void emit_attributes (Gee.ArrayList<AttributeSpec> attributes, bool inline_attr = false) {
+            if (attributes.is_empty) return;
+
+            if (inline_attr) {
+                emit ("[");
+                for (int i = 0; i < attributes.size; i++) {
+                    if (i > 0) emit (", ");
+                    emit_single_attribute_content (attributes.get (i));
                 }
-                emit ("]\n");
+                emit ("] ");
+            } else {
+                foreach (var attr in attributes) {
+                    emit ("[");
+                    emit_single_attribute_content (attr);
+                    emit ("]\n");
+                }
+            }
+        }
+
+        private void emit_single_attribute_content (AttributeSpec attr) {
+            emit (attr.name);
+            if (!attr.arguments.is_empty) {
+                emit ("(");
+                int idx = 0;
+                foreach (var entry in attr.arguments.entries) {
+                    if (idx > 0) emit (", ");
+                    emit ("%s = ", entry.key);
+                    emit_code_block (entry.value);
+                    idx++;
+                }
+                emit (")");
             }
         }
 
         public void emit_delegate (DelegateName delegate_spec) {
             emit_attributes (delegate_spec.annotations);
+            emit_visibility (delegate_spec.visibility);
+            emit_symbol_modifiers (delegate_spec.modifiers);
             emit ("delegate %s %s (", lookup_name (delegate_spec.return_type), delegate_spec.name);
             for (int i = 0; i < delegate_spec.parameters.size; i++) {
                 if (i > 0)emit (", ");
                 var param = delegate_spec.parameters.get (i);
+                emit_attributes (param.annotations, true);
                 emit ("%s %s", lookup_name (param.type_name), param.name);
             }
             emit (");\n");
@@ -590,53 +628,18 @@ namespace ValaPoet {
             return res;
         }
 
-        public void emit_modifiers (Gee.HashSet<ValaModifier> modifiers) {
-            if (modifiers.is_empty)return;
-            var access = new Gee.ArrayList<ValaModifier>();
-            var remaining = new Gee.ArrayList<ValaModifier>();
+        public void emit_visibility (Visibility vis) {
+            if (vis != Visibility.NONE) {
+                emit ("%s ", vis.to_string ());
+            }
+        }
 
+        public void emit_symbol_modifiers (Gee.HashSet<SymbolModifier> modifiers) {
             foreach (var m in modifiers) {
-                if (m == ValaModifier.PUBLIC || m == ValaModifier.PROTECTED || m == ValaModifier.PRIVATE || m == ValaModifier.INTERNAL) {
-                    access.add (m);
-                } else {
-                    remaining.add (m);
-                }
-            }
-
-            foreach (var m in access) {
-                emit ("%s ", modifier_to_string (m));
-            }
-            foreach (var m in remaining) {
-                emit ("%s ", modifier_to_string (m));
+                emit ("%s ", m.to_string ());
             }
         }
 
-        private string modifier_to_string (ValaModifier m) {
-            switch (m) {
-                case ValaModifier.PUBLIC : return "public";
-                case ValaModifier.PRIVATE : return "private";
-                case ValaModifier.PROTECTED: return "protected";
-                case ValaModifier.INTERNAL: return "internal";
-                case ValaModifier.STATIC: return "static";
-                case ValaModifier.ABSTRACT: return "abstract";
-                case ValaModifier.VIRTUAL: return "virtual";
-                case ValaModifier.OVERRIDE: return "override";
-                case ValaModifier.SEALED: return "sealed";
-                case ValaModifier.NEW: return "new";
-                case ValaModifier.ASYNC: return "async";
-                case ValaModifier.YIELD: return "yield";
-                case ValaModifier.OWNED: return "owned";
-                case ValaModifier.UNOWNED: return "unowned";
-                case ValaModifier.WEAK: return "weak";
-                case ValaModifier.CONST: return "const";
-                case ValaModifier.DYNAMIC: return "dynamic";
-                case ValaModifier.EXTERN: return "extern";
-                case ValaModifier.INLINE: return "inline";
-                case ValaModifier.PARTIAL: return "partial";
-                case ValaModifier.VOLATILE: return "volatile";
-                default: return "";
-            }
-        }
 
         [PrintfFormat ()]
         public void emit (string format, ...) {

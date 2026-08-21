@@ -30,7 +30,7 @@ public class ErrorDomainSampleTest : Object {
 }
 """;
             var err_domain = TypeSpec.error_domain_builder ("FileError")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_error_code ("NOT_FOUND")
             .add_error_code ("PERMISSION_DENIED")
             .build ();
@@ -45,13 +45,13 @@ public class ErrorDomainSampleTest : Object {
 
         Test.add_func ("/valapoet/enum_constant_spec", () => {
             var to_string_method = MethodSpec.method_builder ("to_string_name")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .returns (TypeName.STRING)
             .add_statement ("return \"LogLevel\"")
             .build ();
 
             var status_enum = TypeSpec.enum_builder ("LogLevel")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_enum_constant ("DEBUG", 0)
             .add_enum_constant ("INFO", 1)
             .add_enum_constant ("ERROR", 2)

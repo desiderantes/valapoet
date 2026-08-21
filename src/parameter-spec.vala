@@ -21,6 +21,7 @@ namespace ValaPoet {
     public class ParameterSpec : GLib.Object {
 
 
+
         public enum Direction {
             IN,
             OUT,
@@ -30,8 +31,8 @@ namespace ValaPoet {
         public string name { get; private set; }
         public TypeName type_name { get; private set; }
         public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-        public Gee.HashSet<ValaModifier> modifiers { get; private set; }
-        public Direction direction { get; private set; }
+        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public ParameterDirection direction { get; private set; }
         public CodeBlock? default_value { get; private set; }
         public bool is_params { get; private set; }
 
@@ -40,9 +41,9 @@ namespace ValaPoet {
             this.type_name = builder.type_name;
             this.annotations = new Gee.ArrayList<AttributeSpec>();
             this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<SymbolModifier>();
             this.modifiers.add_all (builder.modifiers);
-            this.direction = builder.param_direction;
+            this.direction = builder.param_dir;
             this.default_value = builder.default_val;
             this.is_params = builder.is_params;
         }
@@ -55,8 +56,8 @@ namespace ValaPoet {
             public string name { get; private set; }
             public TypeName type_name { get; private set; }
             public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-            public Gee.HashSet<ValaModifier> modifiers { get; private set; }
-            public Direction param_direction { get; private set; }
+            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+            public ParameterDirection param_dir { get; private set; }
             public CodeBlock? default_val { get; private set; }
             public bool is_params { get; private set; }
 
@@ -64,22 +65,24 @@ namespace ValaPoet {
                 this.type_name = type_name;
                 this.name = name;
                 this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
-                this.param_direction = Direction.IN;
+                this.modifiers = new Gee.HashSet<SymbolModifier>();
+                this.param_dir = ParameterDirection.IN;
             }
 
-            public Builder add_modifiers (params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var mod in modifiers) {
-                    if (mod != ValaModifier.OWNED && mod != ValaModifier.UNOWNED) {
-                        warning ("Adding unusual modifier '%s' to a parameter.", mod.to_string ());
-                    }
                     this.modifiers.add (mod);
                 }
                 return this;
             }
 
-            public Builder direction (Direction dir) {
-                this.param_direction = dir;
+            public Builder add_attribute (AttributeSpec attribute) {
+                this.annotations.add (attribute);
+                return this;
+            }
+
+            public Builder direction (ParameterDirection dir) {
+                this.param_dir = dir;
                 return this;
             }
 

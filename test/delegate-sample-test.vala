@@ -26,13 +26,14 @@ public class DelegateSampleTest : Object {
 
         Test.add_func ("/valapoet/delegate_sample", () => {
             var expected = """[CCode(has_target = false)]
-delegate void CustomCallback (int status_code, string message);
+public delegate void CustomCallback (int status_code, string message);
 """;
             var ccode_attr = AttributeSpec.builder ("CCode")
             .add_argument ("has_target", "false")
             .build ();
 
             var delegate_spec = DelegateName.get ("CustomCallback", TypeName.VOID)
+            .with_visibility (Visibility.PUBLIC)
             .add_annotation (ccode_attr)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "status_code").build ())
             .add_parameter (ParameterSpec.builder (TypeName.STRING, "message").build ());

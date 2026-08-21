@@ -27,6 +27,7 @@ sources = files(
     'field-spec.vala',
     'type-spec.vala',
     'signal-spec.vala',
+    'modifier.vala',
 )
 
 libvalapoet = library(

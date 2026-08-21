@@ -40,23 +40,23 @@ public class CompactNode {
 }
 """;
             var point_struct = TypeSpec.struct_builder ("Point")
-            .add_modifiers (ValaModifier.PUBLIC)
-            .add_field (FieldSpec.builder (TypeName.DOUBLE, "x").add_modifiers (ValaModifier.PUBLIC).build ())
-            .add_field (FieldSpec.builder (TypeName.DOUBLE, "y").add_modifiers (ValaModifier.PUBLIC).build ())
+            .visibility (Visibility.PUBLIC)
+            .add_field (FieldSpec.builder (TypeName.DOUBLE, "x").visibility (Visibility.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.DOUBLE, "y").visibility (Visibility.PUBLIC).build ())
             .build ();
 
             var printable_iface = TypeSpec.interface_builder ("Printable")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
-            .add_method (MethodSpec.method_builder ("to_string").add_modifiers (ValaModifier.PUBLIC, ValaModifier.ABSTRACT).returns (TypeName.STRING).build ())
+            .add_method (MethodSpec.method_builder ("to_string").visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.ABSTRACT).returns (TypeName.STRING).build ())
             .build ();
 
             var compact_attr = AttributeSpec.builder ("Compact").build ();
 
             var compact_class = TypeSpec.class_builder ("CompactNode")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_attribute (compact_attr)
-            .add_field (FieldSpec.builder (TypeName.INT, "value").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.INT, "value").visibility (Visibility.PUBLIC).build ())
             .build ();
 
             var vala_file = ValaFile.builder ()
@@ -71,12 +71,12 @@ public class CompactNode {
 
         Test.add_func ("/valapoet/nested_type_newline_spacing", () => {
             var inner_class = TypeSpec.class_builder ("Inner")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .build ();
 
             var outer_class = TypeSpec.class_builder ("Outer")
-            .add_modifiers (ValaModifier.PUBLIC)
-            .add_field (FieldSpec.builder (TypeName.INT, "val").add_modifiers (ValaModifier.PUBLIC).build ())
+            .visibility (Visibility.PUBLIC)
+            .add_field (FieldSpec.builder (TypeName.INT, "val").visibility (Visibility.PUBLIC).build ())
             .add_type (inner_class)
             .build ();
 

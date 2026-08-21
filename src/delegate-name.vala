@@ -25,16 +25,35 @@ namespace ValaPoet {
         public string name { get; private set; }
         public TypeName return_type { get; private set; }
         public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
+        public Visibility visibility { get; private set; }
+        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
 
         public DelegateName (string name, TypeName return_type, Gee.ArrayList<ParameterSpec> ? parameters = null) {
             this.name = name;
             this.return_type = return_type;
             this.parameters = (parameters != null) ? parameters : new Gee.ArrayList<ParameterSpec>();
             this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.visibility = Visibility.NONE;
+            this.modifiers = new Gee.HashSet<SymbolModifier>();
         }
 
         public static new DelegateName get (string name, TypeName return_type) {
             return new DelegateName (name, return_type);
+        }
+
+        public DelegateName add_modifiers (params SymbolModifier[] modifiers) {
+            foreach (var m in modifiers) {
+                if (!m.targets_delegate ()) {
+                    warning ("Modifier '%s' is not applicable to delegates.", m.to_string ());
+                }
+                this.modifiers.add (m);
+            }
+            return this;
+        }
+
+        public DelegateName with_visibility (Visibility vis) {
+            this.visibility = vis;
+            return this;
         }
 
         public DelegateName add_parameter (ParameterSpec param) {
@@ -59,6 +78,8 @@ namespace ValaPoet {
             copy.is_weak = this.is_weak;
             copy.is_unowned = this.is_unowned;
             copy.is_owned = this.is_owned;
+            copy.visibility = this.visibility;
+            copy.modifiers.add_all (this.modifiers);
             foreach (var a in this.annotations) {
                 copy.annotations.add (a);
             }

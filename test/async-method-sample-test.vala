@@ -40,26 +40,26 @@ public class AsyncMethodSampleTest : Object {
 }
 """;
             var get_endpoint = MethodSpec.method_builder ("get_endpoint")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .returns (TypeName.STRING.copy ().@unowned ())
             .add_statement ("return \"https://example.com\"")
             .build ();
 
             var fetch_internal = MethodSpec.method_builder ("fetch_internal")
-            .add_modifiers (ValaModifier.PRIVATE, ValaModifier.ASYNC)
+            .visibility (Visibility.PRIVATE).add_modifiers (SymbolModifier.ASYNC)
             .add_throws (ClassName.get ("GLib", "FileError"))
             .add_throws (ClassName.get ("GLib", "IOError"))
             .build ();
 
             var fetch_data = MethodSpec.method_builder ("fetch_data_async")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.ASYNC)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.ASYNC)
             .add_throws (ClassName.get ("GLib", "FileError"))
             .add_throws (ClassName.get ("GLib", "IOError"))
             .add_statement ("yield fetch_internal ()")
             .build ();
 
             var client_class = TypeSpec.class_builder ("NetworkClient")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (get_endpoint)
             .add_method (fetch_internal)

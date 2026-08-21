@@ -33,13 +33,13 @@ public class GenericsSampleTest : Object {
             var tv_t = TypeVariableName.get ("T");
 
             var process_method = MethodSpec.method_builder ("process")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_type_variable (tv_t)
             .add_parameter (ParameterSpec.builder (tv_t, "item").build ())
             .build ();
 
             var container_class = TypeSpec.class_builder ("Container")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_type_variable (tv_g)
             .superclass (TypeName.OBJECT)
             .add_method (process_method)

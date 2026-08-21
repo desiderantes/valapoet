@@ -23,15 +23,17 @@ namespace ValaPoet {
         public string name { get; private set; }
         public TypeName? return_type { get; private set; }
         public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
-        public Gee.HashSet<ValaModifier> modifiers { get; private set; }
+        public Visibility visibility { get; private set; }
+        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
         public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
 
         private SignalSpec (Builder builder) {
             this.name = builder.name;
             this.return_type = builder.return_type;
+            this.visibility = builder.vis;
             this.parameters = new Gee.ArrayList<ParameterSpec>();
             this.parameters.add_all (builder.parameters);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+            this.modifiers = new Gee.HashSet<SymbolModifier>();
             this.modifiers.add_all (builder.modifiers);
             this.attributes = new Gee.ArrayList<AttributeSpec>();
             this.attributes.add_all (builder.attributes);
@@ -45,13 +47,15 @@ namespace ValaPoet {
             public string name { get; private set; }
             public TypeName? return_type { get; private set; }
             public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
-            public Gee.HashSet<ValaModifier> modifiers { get; private set; }
+            public Visibility vis { get; private set; }
+            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
             public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
 
             public Builder (string name) {
                 this.name = name;
+                this.vis = Visibility.NONE;
                 this.parameters = new Gee.ArrayList<ParameterSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<SymbolModifier>();
                 this.attributes = new Gee.ArrayList<AttributeSpec>();
             }
 
@@ -65,10 +69,15 @@ namespace ValaPoet {
                 return this;
             }
 
-            public Builder add_modifiers (params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
+                return this;
+            }
+
+            public Builder visibility (Visibility vis) {
+                this.vis = vis;
                 return this;
             }
 

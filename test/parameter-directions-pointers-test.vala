@@ -45,15 +45,15 @@ public class CustomHandler : BaseHandler {
             var p_input = ParameterSpec.builder (TypeName.INT, "input").build ();
 
             var p_output = ParameterSpec.builder (TypeName.INT, "output")
-            .direction (ParameterSpec.Direction.OUT)
+            .direction (ParameterDirection.OUT)
             .build ();
 
             var p_status = ParameterSpec.builder (TypeName.INT, "status")
-            .direction (ParameterSpec.Direction.REF)
+            .direction (ParameterDirection.REF)
             .build ();
 
             var base_process = MethodSpec.method_builder ("process_data")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (p_input)
             .add_parameter (p_output)
             .add_parameter (p_status)
@@ -62,13 +62,13 @@ public class CustomHandler : BaseHandler {
             .build ();
 
             var base_class = TypeSpec.class_builder ("BaseHandler")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (base_process)
             .build ();
 
             var hide_process = MethodSpec.method_builder ("process_data")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.NEW)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.NEW)
             .add_parameter (p_input)
             .add_parameter (p_output)
             .add_parameter (p_status)
@@ -79,13 +79,13 @@ public class CustomHandler : BaseHandler {
             var matrix_type = new ArrayTypeName.of (TypeName.INT, 2);
 
             var raw_method = MethodSpec.method_builder ("handle_raw_pointer")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (void_ptr_type, "ptr").build ())
             .add_parameter (ParameterSpec.builder (matrix_type, "matrix").build ())
             .build ();
 
             var custom_class = TypeSpec.class_builder ("CustomHandler")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (ClassName.get ("", "BaseHandler"))
             .add_method (hide_process)
             .add_method (raw_method)
@@ -100,15 +100,88 @@ public class CustomHandler : BaseHandler {
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
+        Test.add_func ("/valapoet/null_terminated_array_parameter", () => {
+            var expected = """public class ExecHelper : GLib.Object {
+	public void run ([CCode(array_length = false, array_null_terminated = true)] string[] args) {
+	}
+}
+""";
+            var null_term_attr = AttributeSpec.builder ("CCode")
+            .add_argument ("array_length", "false")
+            .add_argument ("array_null_terminated", "true")
+            .build ();
+
+            var param = ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args")
+            .add_attribute (null_term_attr)
+            .build ();
+
+            var run_method = MethodSpec.method_builder ("run")
+            .visibility (Visibility.PUBLIC)
+            .add_parameter (param)
+            .build ();
+
+            var exec_class = TypeSpec.class_builder ("ExecHelper")
+            .visibility (Visibility.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (run_method)
+            .build ();
+
+            var vala_file_nt = ValaFile.builder ()
+            .add_type (exec_class)
+            .build ();
+
+            assert_cmpstr (vala_file_nt.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (CodeCompiler.verify_code_compiles (vala_file_nt.to_string ()));
+        });
+
+        Test.add_func ("/valapoet/multiple_joined_parameter_attributes", () => {
+            var expected = """public class MultiAttrHelper : GLib.Object {
+	public void run ([CCode(array_length = false, array_null_terminated = true), Version(since = "1.0")] string[] args) {
+	}
+}
+""";
+            var ccode_attr = AttributeSpec.builder ("CCode")
+            .add_argument ("array_length", "false")
+            .add_argument ("array_null_terminated", "true")
+            .build ();
+
+            var ver_attr = AttributeSpec.builder ("Version")
+            .add_argument ("since", "\"1.0\"")
+            .build ();
+
+            var param = ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args")
+            .add_attribute (ccode_attr)
+            .add_attribute (ver_attr)
+            .build ();
+
+            var run_method = MethodSpec.method_builder ("run")
+            .visibility (Visibility.PUBLIC)
+            .add_parameter (param)
+            .build ();
+
+            var exec_class = TypeSpec.class_builder ("MultiAttrHelper")
+            .visibility (Visibility.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (run_method)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (exec_class)
+            .build ();
+
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
+        });
+
         Test.add_func ("/valapoet/primitive_type_helpers", () => {
             var buffer_class = TypeSpec.class_builder ("BufferContainer")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
-            .add_field (FieldSpec.builder (TypeName.SIZE_T, "size").add_modifiers (ValaModifier.PUBLIC).build ())
-            .add_field (FieldSpec.builder (TypeName.SSIZE_T, "ssize").add_modifiers (ValaModifier.PUBLIC).build ())
-            .add_field (FieldSpec.builder (TypeName.UINT32, "id32").add_modifiers (ValaModifier.PUBLIC).build ())
-            .add_field (FieldSpec.builder (TypeName.INT64, "id64").add_modifiers (ValaModifier.PUBLIC).build ())
-            .add_field (FieldSpec.builder (TypeName.UINT64, "uid64").add_modifiers (ValaModifier.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.SIZE_T, "size").visibility (Visibility.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.SSIZE_T, "ssize").visibility (Visibility.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.UINT32, "id32").visibility (Visibility.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.INT64, "id64").visibility (Visibility.PUBLIC).build ())
+            .add_field (FieldSpec.builder (TypeName.UINT64, "uid64").visibility (Visibility.PUBLIC).build ())
             .build ();
 
             var vala_file = ValaFile.builder ()

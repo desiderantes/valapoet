@@ -154,13 +154,13 @@ void main () {
 
         Test.add_func ("/valapoet/raw_statement_literals", () => {
             var print_method = MethodSpec.method_builder ("print_format")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_statement_raw ("string text = \"%s = %d\".printf (\"item\", 42)")
             .add_statement_raw ("stdout.printf (\"%s\\n\", text)")
             .build ();
 
             var test_class = TypeSpec.class_builder ("RawLiteralDemo")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (print_method)
             .build ();

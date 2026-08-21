@@ -43,18 +43,18 @@ public class OwnershipSampleTest : Object {
             parent_type.is_nullable = true;
 
             var parent_field = FieldSpec.builder (parent_type, "parent")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .build ();
 
             var data_field = FieldSpec.builder (TypeName.STRING, "data")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .build ();
 
             var unowned_ret_type = ClassName.get ("", "Node").copy ();
             unowned_ret_type.is_unowned = true;
 
             var get_parent_method = MethodSpec.method_builder ("get_parent")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .returns (unowned_ret_type)
             .add_statement ("return parent")
             .build ();
@@ -65,13 +65,13 @@ public class OwnershipSampleTest : Object {
             var set_data_param = ParameterSpec.builder (owned_param_type, "data").build ();
 
             var set_data_method = MethodSpec.method_builder ("set_node_data")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (set_data_param)
             .add_statement ("this.data = (owned) data")
             .build ();
 
             var node_class = TypeSpec.class_builder ("Node")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_field (parent_field)
             .add_field (data_field)

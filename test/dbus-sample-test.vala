@@ -43,17 +43,17 @@ public class DemoService : GLib.Object {
             .build ();
 
             var status_signal = SignalSpec.builder ("status_changed")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.STRING, "status").build ())
             .build ();
 
             var counter_prop = PropertySpec.builder (TypeName.INT, "counter")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .auto ()
             .build ();
 
             var exec_method = MethodSpec.method_builder ("execute_action")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.STRING, "action_name").build ())
             .add_statement ("counter++")
             .add_statement ("status_changed (action_name)")
@@ -61,7 +61,7 @@ public class DemoService : GLib.Object {
 
             var service_class = TypeSpec.class_builder ("DemoService")
             .add_attribute (dbus_attr)
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_signal (status_signal)
             .add_property (counter_prop)

@@ -27,7 +27,7 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_hello_world", () => {
             var main_method = MethodSpec.method_builder ("main")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.STATIC)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.STATIC)
             .returns (TypeName.INT)
             .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args").build ())
             .add_statement ("stdout.printf (\"Hello, ValaPoet!\\n\")")
@@ -35,7 +35,7 @@ public class ReadmeSampleTest : Object {
             .build ();
 
             var hello_world_class = TypeSpec.class_builder ("HelloWorld")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (main_method)
             .build ();
@@ -68,7 +68,7 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_properties", () => {
             var age_prop = PropertySpec.builder (TypeName.INT, "age")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .auto ()
             .default_value ("32")
             .build ();
@@ -77,17 +77,17 @@ public class ReadmeSampleTest : Object {
             var set_body = CodeBlock.builder ().add_statement ("_name = value").build ();
 
             var name_prop = PropertySpec.builder (TypeName.STRING, "name")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .get_body (get_body)
             .set_body (set_body)
             .build ();
 
             var name_field = FieldSpec.builder (TypeName.STRING, "_name")
-            .add_modifiers (ValaModifier.PRIVATE)
+            .visibility (Visibility.PRIVATE)
             .build ();
 
             var person_class = TypeSpec.class_builder ("Person")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_field (name_field)
             .add_property (age_prop)
@@ -100,13 +100,13 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_signals", () => {
             var activated_signal = SignalSpec.builder ("activated")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "value").build ())
             .add_attribute (AttributeSpec.builder ("Signal").add_argument ("action", "true").build ())
             .build ();
 
             var widget_class = TypeSpec.class_builder ("MyWidget")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_signal (activated_signal)
             .build ();
@@ -117,17 +117,17 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_constructors", () => {
             var path_field = FieldSpec.builder (TypeName.STRING, "path")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .build ();
 
             var from_file_ctor = MethodSpec.named_constructor_builder ("from_file")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (ClassName.get ("GLib", "File"), "file").build ())
             .add_statement ("this.path = file.get_path ()")
             .build ();
 
             var doc_class = TypeSpec.class_builder ("Document")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_field (path_field)
             .add_method (from_file_ctor)
@@ -139,7 +139,7 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_contracts", () => {
             var safe_divide = MethodSpec.method_builder ("safe_divide")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .returns (TypeName.DOUBLE)
             .add_parameter (ParameterSpec.builder (TypeName.DOUBLE, "numerator").build ())
             .add_parameter (ParameterSpec.builder (TypeName.DOUBLE, "denominator").build ())
@@ -149,7 +149,7 @@ public class ReadmeSampleTest : Object {
             .build ();
 
             var math_class = TypeSpec.class_builder ("MathUtils")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (safe_divide)
             .build ();
@@ -160,10 +160,10 @@ public class ReadmeSampleTest : Object {
 
         Test.add_func ("/valapoet/readme_parameter_directions", () => {
             var process_data = MethodSpec.method_builder ("process_data")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "input").build ())
             .add_parameter (ParameterSpec.builder (TypeName.STRING, "output")
-                            .direction (ParameterSpec.Direction.OUT)
+                            .direction (ParameterDirection.OUT)
                             .build ())
             .add_parameter (ParameterSpec.builder (TypeName.BOOL, "verbose")
                             .default_value ("false")
@@ -172,7 +172,7 @@ public class ReadmeSampleTest : Object {
             .build ();
 
             var processor_class = TypeSpec.class_builder ("DataProcessor")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_method (process_data)
             .build ();
@@ -184,7 +184,7 @@ public class ReadmeSampleTest : Object {
         Test.add_func ("/valapoet/readme_generics_delegates_nameallocator", () => {
             var type_variable = TypeVariableName.get ("T");
             var list_class = TypeSpec.class_builder ("CustomList")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_type_variable (type_variable)
             .build ();

@@ -18,13 +18,7 @@
 
 namespace ValaPoet {
 
-    public static uint vala_modifier_hash (ValaModifier m) {
-        return (uint) m;
-    }
 
-    public static bool vala_modifier_equal (ValaModifier a, ValaModifier b) {
-        return a == b;
-    }
 
     public class EnumConstantSpec : GLib.Object {
         public string name { get; private set; }
@@ -42,6 +36,7 @@ namespace ValaPoet {
     public class TypeSpec : GLib.Object {
 
 
+
         public enum Kind {
             CLASS,
             STRUCT,
@@ -54,7 +49,6 @@ namespace ValaPoet {
         public Kind kind { get; private set; }
         public string name { get; private set; }
         public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
-        public Gee.HashSet<ValaModifier> modifiers { get; private set; }
         public CodeBlock? valadoc { get; private set; }
         public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
         public TypeName? superclass { get; private set; }
@@ -69,16 +63,17 @@ namespace ValaPoet {
         public CodeBlock? construct_block { get; private set; }
         public CodeBlock? class_construct_block { get; private set; }
         public CodeBlock? static_construct_block { get; private set; }
+        public Visibility visibility { get; private set; }
+        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
 
         private TypeSpec (Builder builder) {
             this.kind = builder.kind;
             this.name = builder.name;
+            this.visibility = builder.vis;
             this.attributes = new Gee.ArrayList<AttributeSpec>();
             this.attributes.add_all (builder.attributes);
-            this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
-            foreach (var m in builder.modifiers) {
-                this.modifiers.add (m);
-            }
+            this.modifiers = new Gee.HashSet<SymbolModifier>();
+            this.modifiers.add_all (builder.modifiers);
             this.valadoc = builder.valadoc.build ();
             this.type_variables = new Gee.ArrayList<TypeVariableName>();
             this.type_variables.add_all (builder.type_variables);
@@ -131,8 +126,9 @@ namespace ValaPoet {
         public class Builder : GLib.Object {
             public Kind kind { get; private set; }
             public string name { get; private set; }
+            public Visibility vis { get; private set; }
+            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
             public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
-            public Gee.HashSet<ValaModifier> modifiers { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
             public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
             public TypeName? super_class { get; private set; }
@@ -151,8 +147,9 @@ namespace ValaPoet {
             public Builder (Kind kind, string name) {
                 this.kind = kind;
                 this.name = name;
+                this.vis = Visibility.NONE;
                 this.attributes = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<ValaModifier>(vala_modifier_hash, vala_modifier_equal);
+                this.modifiers = new Gee.HashSet<SymbolModifier>();
                 this.valadoc = new CodeBlock.Builder ();
                 this.type_variables = new Gee.ArrayList<TypeVariableName>();
                 this.superinterfaces = new Gee.ArrayList<TypeName>();
@@ -165,10 +162,15 @@ namespace ValaPoet {
                 this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
             }
 
-            public Builder add_modifiers (params ValaModifier[] modifiers) {
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
                     this.modifiers.add (m);
                 }
+                return this;
+            }
+
+            public Builder visibility (Visibility vis) {
+                this.vis = vis;
                 return this;
             }
 
@@ -205,6 +207,21 @@ namespace ValaPoet {
 
             public Builder superclass (TypeName superclass) {
                 this.super_class = superclass;
+                return this;
+            }
+
+            public Builder prerequisite (TypeName prerequisite) {
+                this.super_class = prerequisite;
+                return this;
+            }
+
+            public Builder add_superinterface (TypeName superinterface) {
+                this.superinterfaces.add (superinterface);
+                return this;
+            }
+
+            public Builder add_prerequisite (TypeName prerequisite) {
+                this.superinterfaces.add (prerequisite);
                 return this;
             }
 
@@ -249,15 +266,26 @@ namespace ValaPoet {
             }
 
             public TypeSpec build () {
+                Target target = Target.CLASS;
+                if (kind == Kind.INTERFACE) target = Target.INTERFACE;
+                else if (kind == Kind.STRUCT) target = Target.STRUCT;
+                else if (kind == Kind.ENUM) target = Target.ENUM;
+
+                foreach (var m in modifiers) {
+                    if (!m.applies_to (target)) {
+                        warning ("Modifier '%s' is not applicable to %s.", m.to_string (), kind.to_string ());
+                    }
+                }
+
                 bool has_abstract_method = false;
                 foreach (var method in methods) {
-                    if (method.modifiers.contains (ValaModifier.ABSTRACT)) {
+                    if (method.modifiers.contains (SymbolModifier.ABSTRACT)) {
                         has_abstract_method = true;
                         break;
                     }
                 }
 
-                if (has_abstract_method && !modifiers.contains (ValaModifier.ABSTRACT) && kind == Kind.CLASS) {
+                if (has_abstract_method && !modifiers.contains (SymbolModifier.ABSTRACT) && kind == Kind.CLASS) {
                     error ("class with abstract methods must be abstract");
                 }
 

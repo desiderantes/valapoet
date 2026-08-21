@@ -30,7 +30,7 @@ ensures (amount != 0) {
 }
 """;
             var method = MethodSpec.method_builder ("set_amount")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "amount").build ())
             .add_requires ("amount > 0")
             .add_ensures ("amount != 0")

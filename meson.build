@@ -1,4 +1,4 @@
-project('valapoet', 'vala', 'c', meson_version: '>= 1.10.0', version: '0.1.0')
+project('valapoet', 'vala', 'c', meson_version: '>= 1.10.0', version: '0.2.0')
 
 valac = meson.get_compiler('vala')
 

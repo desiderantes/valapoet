@@ -51,41 +51,41 @@ public class BaseWidget : FooWidget {
 }
 """;
             var foo_name_prop = PropertySpec.builder (TypeName.STRING, "name")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.VIRTUAL)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.VIRTUAL)
             .auto ()
             .build ();
 
             var foo_class = TypeSpec.class_builder ("FooWidget")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (TypeName.OBJECT)
             .add_property (foo_name_prop)
             .build ();
 
             var title_prop = PropertySpec.builder (TypeName.STRING, "title")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.VIRTUAL)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.VIRTUAL)
             .auto ()
             .build ();
 
             var label_prop = PropertySpec.builder (TypeName.STRING, "label")
-            .add_modifiers (ValaModifier.PUBLIC)
-            .add_set_modifiers (ValaModifier.PRIVATE)
+            .visibility (Visibility.PUBLIC)
+            .private_set ()
             .build ();
 
             var get_code = CodeBlock.builder ().add_statement ("return _name").build ();
             var set_code = CodeBlock.builder ().add_statement ("_name = value").build ();
 
             var name_prop = PropertySpec.builder (TypeName.STRING, "name")
-            .add_modifiers (ValaModifier.PUBLIC, ValaModifier.OVERRIDE)
+            .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.OVERRIDE)
             .get_body (get_code)
             .set_body (set_code)
             .build ();
 
             var name_field = FieldSpec.builder (TypeName.STRING, "_name")
-            .add_modifiers (ValaModifier.PRIVATE)
+            .visibility (Visibility.PRIVATE)
             .build ();
 
             var widget_class = TypeSpec.class_builder ("BaseWidget")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (ClassName.get ("", "FooWidget"))
             .add_field (name_field)
             .add_property (title_prop)
@@ -99,6 +99,61 @@ public class BaseWidget : FooWidget {
             .build ();
 
             assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
+        });
+
+        Test.add_func ("/valapoet/read_only_and_owned_property", () => {
+            var owned_str_type = TypeName.STRING.copy ();
+            owned_str_type.is_owned = true;
+
+            var prop = PropertySpec.builder (owned_str_type, "status")
+                       .visibility (Visibility.PUBLIC).add_modifiers (SymbolModifier.ABSTRACT)
+                       .read_only ()
+                       .build ();
+
+            var iface = TypeSpec.interface_builder ("IDemo")
+                        .visibility (Visibility.PUBLIC)
+                        .prerequisite (ClassName.get ("GLib", "Object"))
+                        .add_property (prop)
+                        .build ();
+
+            var vala_file = ValaFile.builder ()
+                             .add_type (iface)
+                             .build ();
+
+            var expected = """public interface IDemo : GLib.Object {
+	public abstract string status {
+		owned get;
+	}
+}
+""";
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
+        });
+
+        Test.add_func ("/valapoet/builder_convenience_methods", () => {
+            var prop1 = PropertySpec.builder (TypeName.INT, "count")
+                        .visibility (Visibility.PUBLIC)
+                        .private_set ()
+                        .default_value ("10")
+                        .build ();
+
+            var prop2 = PropertySpec.builder (TypeName.STRING, "tag")
+                        .visibility (Visibility.PUBLIC)
+                        .construct_only ()
+                        .build ();
+
+            var widget_class = TypeSpec.class_builder ("Counter")
+                               .visibility (Visibility.PUBLIC)
+                               .superclass (ClassName.get ("GLib", "Object"))
+                               .add_property (prop1)
+                               .add_property (prop2)
+                               .build ();
+
+            var vala_file = ValaFile.builder ()
+                             .add_type (widget_class)
+                             .build ();
+
             assert_true (CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 

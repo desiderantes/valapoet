@@ -38,7 +38,7 @@ public class NameAllocatorTest : Object {
         Test.add_func ("/valapoet/super_class_name_collision_resolution", () => {
             var base_type = ClassName.get ("Framework.Core", "Widget");
             var derived_class = TypeSpec.class_builder ("Widget")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .superclass (base_type)
             .build ();
 

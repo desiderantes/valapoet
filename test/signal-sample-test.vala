@@ -45,7 +45,7 @@ class Demo {
 """;
 
             var some_event_signal = SignalSpec.builder ("some_event")
-            .add_modifiers (ValaModifier.PUBLIC)
+            .visibility (Visibility.PUBLIC)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "i").build ())
             .build ();
 
@@ -54,14 +54,14 @@ class Demo {
             .build ();
 
             var on_some_event_method = MethodSpec.method_builder ("on_some_event")
-            .add_modifiers (ValaModifier.STATIC)
+            .add_modifiers (SymbolModifier.STATIC)
             .add_parameter (ParameterSpec.builder (ClassName.get ("", "Foo"), "sender").build ())
             .add_parameter (ParameterSpec.builder (TypeName.INT, "i").build ())
             .add_statement ("stdout.printf (\"Handler A: %d\\n\", i)")
             .build ();
 
             var main_method = MethodSpec.method_builder ("main")
-            .add_modifiers (ValaModifier.STATIC)
+            .add_modifiers (SymbolModifier.STATIC)
             .add_statement ("var foo = new Foo ()")
             .add_statement ("foo.some_event.connect (on_some_event)")
             .add_statement ("foo.some_event.connect ((s, i) => stdout.printf (\"Handler B: %d\\n\", i))")
