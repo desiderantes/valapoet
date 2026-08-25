@@ -36,6 +36,8 @@ namespace ValaPoet {
             var copy = new PointerTypeName (this.pointed_to_type.copy ());
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
+            copy.is_unowned = this.is_unowned;
+            copy.is_owned = this.is_owned;
             foreach (var a in this.attributes) {
                 copy.attributes.append (a);
             }
