@@ -85,6 +85,65 @@ public class MethodsSyntaxSupportTest : Object {
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
         });
 
+        Test.add_func ("/valapoet/control_flow_helpers", () => {
+            var expected = """public class FlowHelper : GLib.Object {
+	public void run (string[] items) {
+		foreach (var item in items) {
+			if (item == "skip") {
+				continue;
+			} else if (item == "stop") {
+				break;
+			} else {
+				stdout.printf ("Item: %s\n", item);
+			}
+		}
+		try {
+			int x = 0;
+			while (x < 3) {
+				x++;
+			}
+		} catch (GLib.Error e) {
+			stderr.printf ("Error: %s\n", e.message);
+		}
+	}
+}
+""";
+            var run_method = MethodSpec.method_builder ("run")
+            .visibility (Visibility.PUBLIC)
+            .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "items").build ())
+            .begin_foreach ("var item in items")
+                .begin_if ("item == \"skip\"")
+                    .add_statement ("continue")
+                .else_if ("item == \"stop\"")
+                    .add_statement ("break")
+                .else_block ()
+                    .add_statement ("stdout.printf (\"Item: %s\\n\", item)")
+                .end_control_flow ()
+            .end_control_flow ()
+            .begin_try ()
+                .add_statement ("int x = 0")
+                .begin_while ("x < 3")
+                    .add_statement ("x++")
+                .end_control_flow ()
+            .begin_catch ("GLib.Error e")
+                .add_statement ("stderr.printf (\"Error: %s\\n\", e.message)")
+            .end_control_flow ()
+            .build ();
+
+            var flow_class = TypeSpec.class_builder ("FlowHelper")
+            .visibility (Visibility.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (run_method)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (flow_class)
+            .build ();
+
+            assert_cmpstr (vala_file.to_string (), GLib.CompareOperator.EQ, expected);
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (vala_file.to_string ()));
+        });
+
         Test.add_func ("/valapoet/nested_enum_with_method", () => {
             var enum_to_string = MethodSpec.method_builder ("to_string")
             .visibility (Visibility.PUBLIC)

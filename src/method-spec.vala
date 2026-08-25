@@ -216,6 +216,57 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder begin_foreach (string format, ...) {
+                var va = va_list ();
+                this.code.begin_control_flow_valist ("foreach (" + format + ")", va);
+                return this;
+            }
+
+            public Builder begin_while (string format, ...) {
+                var va = va_list ();
+                this.code.begin_control_flow_valist ("while (" + format + ")", va);
+                return this;
+            }
+
+            public Builder begin_if (string format, ...) {
+                var va = va_list ();
+                this.code.begin_control_flow_valist ("if (" + format + ")", va);
+                return this;
+            }
+
+            public Builder else_if (string format, ...) {
+                var va = va_list ();
+                this.code.next_control_flow_valist ("else if (" + format + ")", va);
+                return this;
+            }
+
+            public Builder else_block () {
+                this.code.else_block ();
+                return this;
+            }
+
+            public Builder begin_switch (string format, ...) {
+                var va = va_list ();
+                this.code.begin_control_flow_valist ("switch (" + format + ")", va);
+                return this;
+            }
+
+            public Builder begin_try () {
+                this.code.begin_try ();
+                return this;
+            }
+
+            public Builder begin_catch (string format, ...) {
+                var va = va_list ();
+                this.code.begin_catch (format, va);
+                return this;
+            }
+
+            public Builder begin_finally () {
+                this.code.begin_finally ();
+                return this;
+            }
+
             public Builder add_code (CodeBlock code_block) {
                 this.code.add_code (code_block);
                 return this;

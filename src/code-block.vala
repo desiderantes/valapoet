@@ -181,6 +181,59 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder begin_foreach (string format, ...) {
+                var va = va_list ();
+                return begin_control_flow_valist ("foreach (" + format + ")", va);
+            }
+
+            public Builder begin_while (string format, ...) {
+                var va = va_list ();
+                return begin_control_flow_valist ("while (" + format + ")", va);
+            }
+
+            public Builder begin_if (string format, ...) {
+                var va = va_list ();
+                return begin_control_flow_valist ("if (" + format + ")", va);
+            }
+
+            public Builder else_if (string format, ...) {
+                var va = va_list ();
+                return next_control_flow_valist ("else if (" + format + ")", va);
+            }
+
+            public Builder else_block () {
+                unindent ();
+                add ("} else {\n");
+                indent ();
+                return this;
+            }
+
+            public Builder begin_switch (string format, ...) {
+                var va = va_list ();
+                return begin_control_flow_valist ("switch (" + format + ")", va);
+            }
+
+            public Builder begin_try () {
+                add ("try {\n");
+                indent ();
+                return this;
+            }
+
+            public Builder begin_catch (string format, ...) {
+                var va = va_list ();
+                unindent ();
+                add_valist ("} catch (" + format + ") {\n", va);
+                indent ();
+                return this;
+            }
+
+            public Builder begin_finally () {
+                unindent ();
+                add ("} finally {\n");
+                indent ();
+                return this;
+            }
+
             public Builder add_code (CodeBlock code_block) {
                 foreach (var fp in code_block.format_parts) {
                     format_parts.append (fp);
