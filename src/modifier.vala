@@ -65,7 +65,10 @@ namespace ValaPoet {
         INLINE,
         ASYNC,
         NEW,
-        CONST;
+        CONST,
+        DYNAMIC,
+        VOLATILE,
+        PARTIAL;
 
         public bool applies_to (Target target) {
             switch (this) {
@@ -83,11 +86,17 @@ namespace ValaPoet {
             case INLINE:
                 return target == Target.METHOD;
             case EXTERN:
-                return target == Target.METHOD || target == Target.FIELD || target == Target.DELEGATE;
+                return target == Target.CLASS || target == Target.STRUCT || target == Target.INTERFACE || target == Target.ENUM || target == Target.METHOD || target == Target.PROPERTY || target == Target.FIELD || target == Target.SIGNAL || target == Target.DELEGATE;
             case CONST:
                 return target == Target.METHOD || target == Target.FIELD;
             case NEW:
-                return target == Target.METHOD || target == Target.PROPERTY || target == Target.FIELD;
+                return target == Target.METHOD || target == Target.PROPERTY || target == Target.FIELD || target == Target.SIGNAL;
+            case DYNAMIC:
+                return target == Target.METHOD || target == Target.PROPERTY || target == Target.SIGNAL;
+            case VOLATILE:
+                return target == Target.FIELD || target == Target.PROPERTY;
+            case PARTIAL:
+                return target == Target.CLASS;
             default:
                 return false;
             }
@@ -143,6 +152,12 @@ namespace ValaPoet {
                 return "new";
             case CONST:
                 return "const";
+            case DYNAMIC:
+                return "dynamic";
+            case VOLATILE:
+                return "volatile";
+            case PARTIAL:
+                return "partial";
             default:
                 return "";
             }

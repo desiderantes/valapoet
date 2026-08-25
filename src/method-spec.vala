@@ -161,6 +161,11 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_valadoc_spec (ValadocSpec doc) {
+                this.valadoc.add_code (doc.to_code_block ());
+                return this;
+            }
+
             public Builder returns (TypeName return_type) {
                 this.return_type = return_type;
                 return this;

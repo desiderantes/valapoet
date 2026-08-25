@@ -180,6 +180,53 @@ public class MethodsSyntaxSupportTest : Object {
             assert_cmpstr (generated, GLib.CompareOperator.EQ, expected);
         });
 
+        Test.add_func ("/valapoet/valadoc_spec_builder", () => {
+            var doc = ValadocSpec.builder ()
+            .summary ("Calculates sum of two numbers.")
+            .description ("Adds number A to number B.")
+            .add_param ("a", "First number")
+            .add_param ("b", "Second number")
+            .returns ("The arithmetic sum")
+            .@throws ("GLib.Error", "On overflow")
+            .since ("1.0")
+            .deprecated ("Use add_all instead")
+            .see ("Calculator.add")
+            .build ();
+
+            var add_method = MethodSpec.method_builder ("add")
+            .visibility (Visibility.PUBLIC)
+            .add_valadoc_spec (doc)
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "a").build ())
+            .add_parameter (ParameterSpec.builder (TypeName.INT, "b").build ())
+            .returns (TypeName.INT)
+            .add_statement ("return a + b")
+            .build ();
+
+            var calc_class = TypeSpec.class_builder ("Calculator")
+            .visibility (Visibility.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_method (add_method)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (calc_class)
+            .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("/**\n"));
+            assert_true (code.contains (" * Calculates sum of two numbers.\n"));
+            assert_true (code.contains (" * Adds number A to number B.\n"));
+            assert_true (code.contains (" * @param a First number\n"));
+            assert_true (code.contains (" * @param b Second number\n"));
+            assert_true (code.contains (" * @return The arithmetic sum\n"));
+            assert_true (code.contains (" * @throws GLib.Error On overflow\n"));
+            assert_true (code.contains (" * @since 1.0\n"));
+            assert_true (code.contains (" * @deprecated Use add_all instead\n"));
+            assert_true (code.contains (" * @see Calculator.add\n"));
+            assert_true (code.contains (" */\n"));
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (code));
+        });
+
         Test.run ();
     }
 }

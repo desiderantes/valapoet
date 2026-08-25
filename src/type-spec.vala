@@ -232,6 +232,11 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_valadoc_spec (ValadocSpec doc) {
+                this.valadoc.add_code (doc.to_code_block ());
+                return this;
+            }
+
             public Builder superclass (TypeName superclass) {
                 this.super_class = superclass;
                 return this;
@@ -358,6 +363,11 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_valadoc_spec (ValadocSpec doc) {
+                inner_builder.add_valadoc_spec (doc);
+                return this;
+            }
+
             public Builder add_constant (string name, int? value = null) {
                 inner_builder.add_enum_constant (name, value);
                 return this;
@@ -410,6 +420,11 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_valadoc_spec (ValadocSpec doc) {
+                inner_builder.add_valadoc_spec (doc);
+                return this;
+            }
+
             public Builder add_error_code (string name) {
                 inner_builder.add_error_code (name);
                 return this;
@@ -419,39 +434,6 @@ namespace ValaPoet {
                 return inner_builder.build ();
             }
         }
-    }
-
-    public enum ValaModifier {
-    // Access Modifiers (Start at 1 so PUBLIC is not (gpointer) 0/NULL in Gee collections)
-        PUBLIC = 1,
-        PRIVATE,
-        PROTECTED,
-        INTERNAL,
-
-        // Lifecycle & Inheritance
-        STATIC,
-        ABSTRACT,
-        VIRTUAL,
-        OVERRIDE,
-        SEALED,
-        NEW,
-
-        // Concurrency & Async
-        ASYNC,
-        YIELD,
-
-        // Memory Management
-        OWNED,
-        UNOWNED,
-        WEAK,
-
-        // Other
-        CONST,
-        DYNAMIC,
-        EXTERN,
-        INLINE,
-        PARTIAL,
-        VOLATILE
     }
 
 }
