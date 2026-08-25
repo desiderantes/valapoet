@@ -1,5 +1,3 @@
-libvala_dep = dependency('libvala-0.56', version: '>= 0.56.0')
-
 test_sources = [
     'hello-world-test.vala',
     'string-sample-test.vala',
@@ -33,10 +31,8 @@ foreach t : test_sources
             files(t, 'valapoet-test-util.vala'),
             dependencies: [
                 dependency('gee-0.8'),
-                libvala_dep,
                 valapoet_dep,
             ],
-            vala_args: ['--pkg', 'gee-0.8', '--pkg', 'libvala-0.56'],
             pie: true,
             install: false,
         ),

@@ -29,7 +29,7 @@ public class ErrorDomainSampleTest : Object {
 	PERMISSION_DENIED
 }
 """;
-            var err_domain = TypeSpec.error_domain_builder ("FileError")
+            var err_domain = ErrorDomainSpec.builder ("FileError")
             .visibility (Visibility.PUBLIC)
             .add_error_code ("NOT_FOUND")
             .add_error_code ("PERMISSION_DENIED")
@@ -50,11 +50,11 @@ public class ErrorDomainSampleTest : Object {
             .add_statement ("return \"LogLevel\"")
             .build ();
 
-            var status_enum = TypeSpec.enum_builder ("LogLevel")
+            var status_enum = EnumSpec.builder ("LogLevel")
             .visibility (Visibility.PUBLIC)
-            .add_enum_constant ("DEBUG", 0)
-            .add_enum_constant ("INFO", 1)
-            .add_enum_constant ("ERROR", 2)
+            .add_constant ("DEBUG", 0)
+            .add_constant ("INFO", 1)
+            .add_constant ("ERROR", 2)
             .add_method (to_string_method)
             .build ();
 
@@ -67,6 +67,36 @@ public class ErrorDomainSampleTest : Object {
             assert_true (code.contains ("INFO = 1,\n"));
             assert_true (code.contains ("ERROR = 2;\n"));
             assert_true (code.contains ("public string to_string_name ()"));
+            assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (code));
+        });
+
+        Test.add_func ("/valapoet/dedicated_enum_spec_and_error_domain_spec", () => {
+            var err_domain = ErrorDomainSpec.builder ("NetError")
+            .visibility (Visibility.PUBLIC)
+            .add_error_code ("TIMEOUT")
+            .add_error_code ("REFUSED")
+            .build ();
+
+            var print_method = MethodSpec.method_builder ("print_info")
+            .visibility (Visibility.PUBLIC)
+            .add_statement ("stdout.printf (\"State\\n\")")
+            .build ();
+
+            var state_enum = EnumSpec.builder ("State")
+            .visibility (Visibility.PUBLIC)
+            .add_constant ("INIT", 1)
+            .add_constant ("RUNNING", 2)
+            .add_method (print_method)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (err_domain)
+            .add_type (state_enum)
+            .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("public errordomain NetError {\n\tTIMEOUT,\n\tREFUSED\n}\n"));
+            assert_true (code.contains ("public enum State {\n\tINIT = 1,\n\tRUNNING = 2;\n"));
             assert_true (ValaPoetTestUtil.CodeCompiler.verify_code_compiles (code));
         });
 

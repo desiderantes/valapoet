@@ -131,12 +131,12 @@ namespace ValaPoet {
             return new Builder (Kind.INTERFACE, name);
         }
 
-        public static Builder enum_builder (string name) {
-            return new Builder (Kind.ENUM, name);
+        public static EnumSpec.Builder enum_builder (string name) {
+            return EnumSpec.builder (name);
         }
 
-        public static Builder error_domain_builder (string name) {
-            return new Builder (Kind.ERROR_DOMAIN, name);
+        public static ErrorDomainSpec.Builder error_domain_builder (string name) {
+            return ErrorDomainSpec.builder (name);
         }
 
         public static Builder namespace_builder (string name) {
@@ -223,6 +223,11 @@ namespace ValaPoet {
 
             public Builder add_valadoc (string format, ...) {
                 var va = va_list ();
+                this.valadoc.add_valist (format, va);
+                return this;
+            }
+
+            public Builder add_valadoc_valist (string format, va_list va) {
                 this.valadoc.add_valist (format, va);
                 return this;
             }
@@ -314,6 +319,105 @@ namespace ValaPoet {
                 return new TypeSpec (this);
             }
 
+        }
+    }
+
+    public class EnumSpec : GLib.Object {
+
+        public static Builder builder (string name) {
+            return new Builder (name);
+        }
+
+        public class Builder : GLib.Object {
+            private TypeSpec.Builder inner_builder;
+
+            public Builder (string name) {
+                this.inner_builder = new TypeSpec.Builder (TypeSpec.Kind.ENUM, name);
+            }
+
+            public Builder visibility (Visibility vis) {
+                inner_builder.visibility (vis);
+                return this;
+            }
+
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
+                foreach (var m in modifiers) {
+                    inner_builder.add_modifiers (m);
+                }
+                return this;
+            }
+
+            public Builder add_attribute (AttributeSpec attribute) {
+                inner_builder.add_attribute (attribute);
+                return this;
+            }
+
+            public Builder add_valadoc (string format, ...) {
+                var va = va_list ();
+                inner_builder.add_valadoc_valist (format, va);
+                return this;
+            }
+
+            public Builder add_constant (string name, int? value = null) {
+                inner_builder.add_enum_constant (name, value);
+                return this;
+            }
+
+            public Builder add_method (MethodSpec method) {
+                inner_builder.add_method (method);
+                return this;
+            }
+
+            public TypeSpec build () {
+                return inner_builder.build ();
+            }
+        }
+    }
+
+    public class ErrorDomainSpec : GLib.Object {
+
+        public static Builder builder (string name) {
+            return new Builder (name);
+        }
+
+        public class Builder : GLib.Object {
+            private TypeSpec.Builder inner_builder;
+
+            public Builder (string name) {
+                this.inner_builder = new TypeSpec.Builder (TypeSpec.Kind.ERROR_DOMAIN, name);
+            }
+
+            public Builder visibility (Visibility vis) {
+                inner_builder.visibility (vis);
+                return this;
+            }
+
+            public Builder add_modifiers (params SymbolModifier[] modifiers) {
+                foreach (var m in modifiers) {
+                    inner_builder.add_modifiers (m);
+                }
+                return this;
+            }
+
+            public Builder add_attribute (AttributeSpec attribute) {
+                inner_builder.add_attribute (attribute);
+                return this;
+            }
+
+            public Builder add_valadoc (string format, ...) {
+                var va = va_list ();
+                inner_builder.add_valadoc_valist (format, va);
+                return this;
+            }
+
+            public Builder add_error_code (string name) {
+                inner_builder.add_error_code (name);
+                return this;
+            }
+
+            public TypeSpec build () {
+                return inner_builder.build ();
+            }
         }
     }
 

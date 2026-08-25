@@ -151,9 +151,9 @@ public class MethodsSyntaxSupportTest : Object {
             .add_statement ("return \"NONE\"")
             .build ();
 
-            var feature_enum = TypeSpec.enum_builder ("Feature")
+            var feature_enum = EnumSpec.builder ("Feature")
             .visibility (Visibility.PUBLIC)
-            .add_enum_constant ("NONE", 0)
+            .add_constant ("NONE", 0)
             .add_method (enum_to_string)
             .build ();
 
