@@ -24,14 +24,18 @@ namespace ValaPoet {
      */
     public class CodeBlock : GLib.Object {
         /** A heterogeneous list containing string literals and value placeholders. */
-        public Gee.ArrayList<string> format_parts { get; private set; }
-        public Gee.ArrayList<Value ?> args { get; private set; }
+        public unowned GLib.List<string> format_parts { get; private set; }
+        public unowned GLib.List<Value ?> args { get; private set; }
 
         public CodeBlock (Builder builder) {
-            this.format_parts = new Gee.ArrayList<string>();
-            this.format_parts.add_all (builder.format_parts);
-            this.args = new Gee.ArrayList<Value ?>();
-            this.args.add_all (builder.args);
+            this.format_parts = new GLib.List<string>();
+            foreach (var fp in builder.format_parts) {
+                this.format_parts.append (fp);
+            }
+            this.args = new GLib.List<Value ?>();
+            foreach (var a in builder.args) {
+                this.args.append (a);
+            }
         }
 
         public static CodeBlock of (string format, ...) {
@@ -46,7 +50,7 @@ namespace ValaPoet {
         }
 
         public bool is_empty () {
-            return format_parts.is_empty;
+            return format_parts == null || format_parts.length () == 0;
         }
 
         public static Builder builder () {
@@ -54,8 +58,8 @@ namespace ValaPoet {
         }
 
         public class Builder : GLib.Object {
-            public Gee.ArrayList<string> format_parts = new Gee.ArrayList<string>();
-            public Gee.ArrayList<Value ?> args = new Gee.ArrayList<Value ?>();
+            public GLib.List<string> format_parts = new GLib.List<string>();
+            public GLib.List<Value ?> args = new GLib.List<Value ?>();
 
             public Builder add (string format, ...) {
                 var va = va_list ();
@@ -79,10 +83,10 @@ namespace ValaPoet {
 
                         if (next == 'L' || next == 'S' || next == 'T' || next == 'N') {
                             if (current.len > 0) {
-                                format_parts.add (current.str);
+                                format_parts.append (current.str);
                                 current.truncate ();
                             }
-                            format_parts.add ("$" + next.to_string ());
+                            format_parts.append ("$" + next.to_string ());
 
                             Value val = Value (typeof (Object));
                             if (next == 'S') {
@@ -93,15 +97,15 @@ namespace ValaPoet {
                                 Object obj = va.arg<Object> ();
                                 val.set_object (obj);
                             }
-                            args.add (val);
+                            args.append (val);
                             p += 2;
                             continue;
                         } else if (c == '$' && (next == '>' || next == '<' || next == '[' || next == ']')) {
                             if (current.len > 0) {
-                                format_parts.add (current.str);
+                                format_parts.append (current.str);
                                 current.truncate ();
                             }
-                            format_parts.add ("$" + next.to_string ());
+                            format_parts.append ("$" + next.to_string ());
                             p += 2;
                             continue;
                         }
@@ -111,7 +115,7 @@ namespace ValaPoet {
                 }
 
                 if (current.len > 0) {
-                    format_parts.add (current.str);
+                    format_parts.append (current.str);
                 }
                 return this;
             }
@@ -133,7 +137,7 @@ namespace ValaPoet {
             }
 
             public Builder add_raw (string code) {
-                format_parts.add (code);
+                format_parts.append (code);
                 return this;
             }
 
@@ -178,23 +182,27 @@ namespace ValaPoet {
             }
 
             public Builder add_code (CodeBlock code_block) {
-                format_parts.add_all (code_block.format_parts);
-                args.add_all (code_block.args);
+                foreach (var fp in code_block.format_parts) {
+                    format_parts.append (fp);
+                }
+                foreach (var a in code_block.args) {
+                    args.append (a);
+                }
                 return this;
             }
 
             public Builder indent () {
-                this.format_parts.add ("$>");
+                this.format_parts.append ("$>");
                 return this;
             }
 
             public Builder unindent () {
-                this.format_parts.add ("$<");
+                this.format_parts.append ("$<");
                 return this;
             }
 
             public bool is_empty () {
-                return format_parts.is_empty;
+                return format_parts == null || format_parts.length () == 0;
             }
 
             public CodeBlock build () {

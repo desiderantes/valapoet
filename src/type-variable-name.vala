@@ -16,8 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-
 namespace ValaPoet {
 
     public class TypeVariableName : TypeName {
@@ -28,7 +26,7 @@ namespace ValaPoet {
         public TypeVariableName (string name, TypeName? bounds = null) {
             this.name = name;
             this.bounds = bounds;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.attributes = new GLib.List<AttributeSpec>();
         }
 
         public static new TypeVariableName get (string name, TypeName? bounds = null) {
@@ -46,8 +44,8 @@ namespace ValaPoet {
             var copy = new TypeVariableName (this.name, (this.bounds != null) ? this.bounds.copy () : null);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
-            foreach (var a in this.annotations) {
-                copy.annotations.add (a);
+            foreach (var a in this.attributes) {
+                copy.attributes.append (a);
             }
             return copy;
         }

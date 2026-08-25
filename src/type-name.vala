@@ -20,7 +20,7 @@ namespace ValaPoet {
 
     public abstract class TypeName : GLib.Object {
 
-        public Gee.ArrayList<AttributeSpec> annotations { get; set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; set; }
 
         public bool is_nullable { get; set; }
         public bool is_weak { get; set; }
@@ -187,7 +187,7 @@ namespace ValaPoet {
 
         public PrimitiveTypeName (string keyword) {
             this.keyword = keyword;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.attributes = new GLib.List<AttributeSpec>();
         }
 
         public override string to_string () {

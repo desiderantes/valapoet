@@ -20,16 +20,22 @@ namespace ValaPoet {
 
     public class ValaFile : GLib.Object {
 
-        public Gee.ArrayList<Object> members { get; private set; }                                                                                                                      // Can contain TypeSpec, MethodSpec, or DelegateName
+        public unowned GLib.List<Object> members { get; private set; } // Can contain TypeSpec, MethodSpec, or DelegateName
         public string indent { get; private set; }
-        public Gee.HashSet<string> usings { get; private set; }
+        public unowned GLib.List<string> usings { get; private set; }
 
         private ValaFile (Builder builder) {
-            this.members = new Gee.ArrayList<Object>();
-            this.members.add_all (builder.members);
+            this.members = new GLib.List<Object>();
+            foreach (var m in builder.members) {
+                this.members.append (m);
+            }
             this.indent = builder.indent_str;
-            this.usings = new Gee.HashSet<string>();
-            this.usings.add_all (builder.usings);
+            this.usings = new GLib.List<string>();
+            foreach (var u in builder.usings) {
+                if (this.usings.find_custom (u, strcmp) == null) {
+                    this.usings.append (u);
+                }
+            }
         }
 
         public void write_to (StringBuilder builder) {
@@ -48,38 +54,40 @@ namespace ValaPoet {
         }
 
         public class Builder : GLib.Object {
-            public Gee.ArrayList<Object> members { get; private set; }
+            public unowned GLib.List<Object> members { get; private set; }
             public string indent_str { get; private set; }
-            public Gee.HashSet<string> usings { get; private set; }
+            public unowned GLib.List<string> usings { get; private set; }
 
             public Builder () {
-                this.members = new Gee.ArrayList<Object>();
-                this.indent_str = "\t";                                                                                                                                                                                                                                                                                                                                                                                 // Vala standard
-                this.usings = new Gee.HashSet<string>();
+                this.members = new GLib.List<Object>();
+                this.indent_str = "\t"; // Vala standard
+                this.usings = new GLib.List<string>();
             }
 
             public Builder add_type (TypeSpec type_spec) {
-                this.members.add (type_spec);
+                this.members.append (type_spec);
                 return this;
             }
 
             public Builder set_namespace (TypeSpec namespace_spec) {
-                this.members.add (namespace_spec);
+                this.members.append (namespace_spec);
                 return this;
             }
 
             public Builder add_method (MethodSpec method_spec) {
-                this.members.add (method_spec);
+                this.members.append (method_spec);
                 return this;
             }
 
             public Builder add_delegate (DelegateName delegate_spec) {
-                this.members.add (delegate_spec);
+                this.members.append (delegate_spec);
                 return this;
             }
 
             public Builder add_using (string ns) {
-                this.usings.add (ns);
+                if (this.usings.find_custom (ns, strcmp) == null) {
+                    this.usings.append (ns);
+                }
                 return this;
             }
 

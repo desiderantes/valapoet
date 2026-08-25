@@ -17,7 +17,6 @@
  */
 
 using ValaPoet;
-using Gee;
 
 namespace ValaPoetTestUtil {
 
@@ -28,28 +27,20 @@ namespace ValaPoetTestUtil {
             try {
                 FileUtils.set_contents (tmp_file, code_content);
 
-                var cmd = new Gee.ArrayList<string> ();
-                cmd.add ("valac");
-                cmd.add ("-C");
-                cmd.add ("--pkg");
-                cmd.add ("gee-0.8");
-                cmd.add ("--pkg");
-                cmd.add ("gio-2.0");
-                cmd.add ("--pkg");
-                cmd.add ("gobject-2.0");
-                cmd.add ("--pkg");
-                cmd.add ("glib-2.0");
+                string[] argv = {
+                    "valac",
+                    "-C",
+                    "--pkg", "gee-0.8",
+                    "--pkg", "gio-2.0",
+                    "--pkg", "gobject-2.0",
+                    "--pkg", "glib-2.0"
+                };
 
                 foreach (var pkg in extra_packages) {
-                    cmd.add ("--pkg");
-                    cmd.add (pkg);
+                    argv += "--pkg";
+                    argv += pkg;
                 }
-                cmd.add (tmp_file);
-
-                string[] argv = new string[cmd.size];
-                for (int i = 0; i < cmd.size; i++) {
-                    argv[i] = cmd[i];
-                }
+                argv += tmp_file;
 
                 int exit_status;
                 string standard_output;

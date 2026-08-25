@@ -22,21 +22,27 @@ namespace ValaPoet {
 
         public string name { get; private set; }
         public TypeName? return_type { get; private set; }
-        public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
+        public unowned GLib.List<ParameterSpec> parameters { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
-        public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
 
         private SignalSpec (Builder builder) {
             this.name = builder.name;
             this.return_type = builder.return_type;
             this.visibility = builder.vis;
-            this.parameters = new Gee.ArrayList<ParameterSpec>();
-            this.parameters.add_all (builder.parameters);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
-            this.attributes = new Gee.ArrayList<AttributeSpec>();
-            this.attributes.add_all (builder.attributes);
+            this.parameters = new GLib.List<ParameterSpec>();
+            foreach (var p in builder.parameters) {
+                this.parameters.append (p);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
         }
 
         public static Builder builder (string name) {
@@ -46,17 +52,17 @@ namespace ValaPoet {
         public class Builder : GLib.Object {
             public string name { get; private set; }
             public TypeName? return_type { get; private set; }
-            public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
+            public unowned GLib.List<ParameterSpec> parameters { get; private set; }
             public Visibility vis { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
-            public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
 
             public Builder (string name) {
                 this.name = name;
                 this.vis = Visibility.NONE;
-                this.parameters = new Gee.ArrayList<ParameterSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
-                this.attributes = new Gee.ArrayList<AttributeSpec>();
+                this.parameters = new GLib.List<ParameterSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
+                this.attributes = new GLib.List<AttributeSpec>();
             }
 
             public Builder returns (TypeName return_type) {
@@ -65,13 +71,15 @@ namespace ValaPoet {
             }
 
             public Builder add_parameter (ParameterSpec parameter) {
-                this.parameters.add (parameter);
+                this.parameters.append (parameter);
                 return this;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.modifiers.add (m);
+                    if (this.modifiers.find (m) == null) {
+                        this.modifiers.append (m);
+                    }
                 }
                 return this;
             }
@@ -82,7 +90,7 @@ namespace ValaPoet {
             }
 
             public Builder add_attribute (AttributeSpec attribute) {
-                this.attributes.add (attribute);
+                this.attributes.append (attribute);
                 return this;
             }
 

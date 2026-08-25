@@ -35,8 +35,6 @@ namespace ValaPoet {
 
     public class TypeSpec : GLib.Object {
 
-
-
         public enum Kind {
             CLASS,
             STRUCT,
@@ -48,52 +46,74 @@ namespace ValaPoet {
 
         public Kind kind { get; private set; }
         public string name { get; private set; }
-        public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public CodeBlock? valadoc { get; private set; }
-        public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
+        public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
         public TypeName? superclass { get; private set; }
-        public Gee.ArrayList<TypeName> superinterfaces { get; private set; }
-        public Gee.ArrayList<MethodSpec> methods { get; private set; }
-        public Gee.ArrayList<FieldSpec> fields { get; private set; }
-        public Gee.ArrayList<PropertySpec> properties { get; private set; }
-        public Gee.ArrayList<SignalSpec> signals { get; private set; }
-        public Gee.ArrayList<TypeSpec> nested_types { get; private set; }
-        public Gee.ArrayList<string> error_codes { get; private set; }
-        public Gee.ArrayList<EnumConstantSpec> enum_constants { get; private set; }
+        public unowned GLib.List<TypeName> superinterfaces { get; private set; }
+        public unowned GLib.List<MethodSpec> methods { get; private set; }
+        public unowned GLib.List<FieldSpec> fields { get; private set; }
+        public unowned GLib.List<PropertySpec> properties { get; private set; }
+        public unowned GLib.List<SignalSpec> signals { get; private set; }
+        public unowned GLib.List<TypeSpec> nested_types { get; private set; }
+        public unowned GLib.List<string> error_codes { get; private set; }
+        public unowned GLib.List<EnumConstantSpec> enum_constants { get; private set; }
         public CodeBlock? construct_block { get; private set; }
         public CodeBlock? class_construct_block { get; private set; }
         public CodeBlock? static_construct_block { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
 
         private TypeSpec (Builder builder) {
             this.kind = builder.kind;
             this.name = builder.name;
             this.visibility = builder.vis;
-            this.attributes = new Gee.ArrayList<AttributeSpec>();
-            this.attributes.add_all (builder.attributes);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
             this.valadoc = builder.valadoc.build ();
-            this.type_variables = new Gee.ArrayList<TypeVariableName>();
-            this.type_variables.add_all (builder.type_variables);
+            this.type_variables = new GLib.List<TypeVariableName>();
+            foreach (var tv in builder.type_variables) {
+                this.type_variables.append (tv);
+            }
             this.superclass = builder.super_class;
-            this.superinterfaces = new Gee.ArrayList<TypeName>();
-            this.superinterfaces.add_all (builder.superinterfaces);
-            this.methods = new Gee.ArrayList<MethodSpec>();
-            this.methods.add_all (builder.methods);
-            this.fields = new Gee.ArrayList<FieldSpec>();
-            this.fields.add_all (builder.fields);
-            this.properties = new Gee.ArrayList<PropertySpec>();
-            this.properties.add_all (builder.properties);
-            this.signals = new Gee.ArrayList<SignalSpec>();
-            this.signals.add_all (builder.signals);
-            this.nested_types = new Gee.ArrayList<TypeSpec>();
-            this.nested_types.add_all (builder.nested_types);
-            this.error_codes = new Gee.ArrayList<string>();
-            this.error_codes.add_all (builder.error_codes);
-            this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
-            this.enum_constants.add_all (builder.enum_constants);
+            this.superinterfaces = new GLib.List<TypeName>();
+            foreach (var si in builder.superinterfaces) {
+                this.superinterfaces.append (si);
+            }
+            this.methods = new GLib.List<MethodSpec>();
+            foreach (var m in builder.methods) {
+                this.methods.append (m);
+            }
+            this.fields = new GLib.List<FieldSpec>();
+            foreach (var f in builder.fields) {
+                this.fields.append (f);
+            }
+            this.properties = new GLib.List<PropertySpec>();
+            foreach (var p in builder.properties) {
+                this.properties.append (p);
+            }
+            this.signals = new GLib.List<SignalSpec>();
+            foreach (var sig in builder.signals) {
+                this.signals.append (sig);
+            }
+            this.nested_types = new GLib.List<TypeSpec>();
+            foreach (var nt in builder.nested_types) {
+                this.nested_types.append (nt);
+            }
+            this.error_codes = new GLib.List<string>();
+            foreach (var ec in builder.error_codes) {
+                this.error_codes.append (ec);
+            }
+            this.enum_constants = new GLib.List<EnumConstantSpec>();
+            foreach (var enc in builder.enum_constants) {
+                this.enum_constants.append (enc);
+            }
             this.construct_block = builder.construct_code_block;
             this.class_construct_block = builder.class_construct_code_block;
             this.static_construct_block = builder.static_construct_code_block;
@@ -127,19 +147,19 @@ namespace ValaPoet {
             public Kind kind { get; private set; }
             public string name { get; private set; }
             public Visibility vis { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
-            public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
-            public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
+            public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
             public TypeName? super_class { get; private set; }
-            public Gee.ArrayList<TypeName> superinterfaces { get; private set; }
-            public Gee.ArrayList<MethodSpec> methods { get; private set; }
-            public Gee.ArrayList<FieldSpec> fields { get; private set; }
-            public Gee.ArrayList<PropertySpec> properties { get; private set; }
-            public Gee.ArrayList<SignalSpec> signals { get; private set; }
-            public Gee.ArrayList<TypeSpec> nested_types { get; private set; }
-            public Gee.ArrayList<string> error_codes { get; private set; }
-            public Gee.ArrayList<EnumConstantSpec> enum_constants { get; private set; }
+            public unowned GLib.List<TypeName> superinterfaces { get; private set; }
+            public unowned GLib.List<MethodSpec> methods { get; private set; }
+            public unowned GLib.List<FieldSpec> fields { get; private set; }
+            public unowned GLib.List<PropertySpec> properties { get; private set; }
+            public unowned GLib.List<SignalSpec> signals { get; private set; }
+            public unowned GLib.List<TypeSpec> nested_types { get; private set; }
+            public unowned GLib.List<string> error_codes { get; private set; }
+            public unowned GLib.List<EnumConstantSpec> enum_constants { get; private set; }
             public CodeBlock? construct_code_block { get; private set; }
             public CodeBlock? class_construct_code_block { get; private set; }
             public CodeBlock? static_construct_code_block { get; private set; }
@@ -148,23 +168,25 @@ namespace ValaPoet {
                 this.kind = kind;
                 this.name = name;
                 this.vis = Visibility.NONE;
-                this.attributes = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
+                this.attributes = new GLib.List<AttributeSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
                 this.valadoc = new CodeBlock.Builder ();
-                this.type_variables = new Gee.ArrayList<TypeVariableName>();
-                this.superinterfaces = new Gee.ArrayList<TypeName>();
-                this.methods = new Gee.ArrayList<MethodSpec>();
-                this.fields = new Gee.ArrayList<FieldSpec>();
-                this.properties = new Gee.ArrayList<PropertySpec>();
-                this.signals = new Gee.ArrayList<SignalSpec>();
-                this.nested_types = new Gee.ArrayList<TypeSpec>();
-                this.error_codes = new Gee.ArrayList<string>();
-                this.enum_constants = new Gee.ArrayList<EnumConstantSpec>();
+                this.type_variables = new GLib.List<TypeVariableName>();
+                this.superinterfaces = new GLib.List<TypeName>();
+                this.methods = new GLib.List<MethodSpec>();
+                this.fields = new GLib.List<FieldSpec>();
+                this.properties = new GLib.List<PropertySpec>();
+                this.signals = new GLib.List<SignalSpec>();
+                this.nested_types = new GLib.List<TypeSpec>();
+                this.error_codes = new GLib.List<string>();
+                this.enum_constants = new GLib.List<EnumConstantSpec>();
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.modifiers.add (m);
+                    if (this.modifiers.find (m) == null) {
+                        this.modifiers.append (m);
+                    }
                 }
                 return this;
             }
@@ -175,27 +197,27 @@ namespace ValaPoet {
             }
 
             public Builder add_type_variable (TypeVariableName type_variable) {
-                this.type_variables.add (type_variable);
+                this.type_variables.append (type_variable);
                 return this;
             }
 
             public Builder add_error_code (string error_code) {
-                this.error_codes.add (error_code);
+                this.error_codes.append (error_code);
                 return this;
             }
 
             public Builder add_enum_constant (string name, int? value = null) {
-                this.enum_constants.add (new EnumConstantSpec (name, value));
+                this.enum_constants.append (new EnumConstantSpec (name, value));
                 return this;
             }
 
             public Builder add_enum_constant_spec (EnumConstantSpec enum_constant) {
-                this.enum_constants.add (enum_constant);
+                this.enum_constants.append (enum_constant);
                 return this;
             }
 
             public Builder add_attribute (AttributeSpec attribute) {
-                this.attributes.add (attribute);
+                this.attributes.append (attribute);
                 return this;
             }
 
@@ -216,37 +238,37 @@ namespace ValaPoet {
             }
 
             public Builder add_superinterface (TypeName superinterface) {
-                this.superinterfaces.add (superinterface);
+                this.superinterfaces.append (superinterface);
                 return this;
             }
 
             public Builder add_prerequisite (TypeName prerequisite) {
-                this.superinterfaces.add (prerequisite);
+                this.superinterfaces.append (prerequisite);
                 return this;
             }
 
             public Builder add_method (MethodSpec method) {
-                this.methods.add (method);
+                this.methods.append (method);
                 return this;
             }
 
             public Builder add_field (FieldSpec field) {
-                this.fields.add (field);
+                this.fields.append (field);
                 return this;
             }
 
             public Builder add_property (PropertySpec prop) {
-                this.properties.add (prop);
+                this.properties.append (prop);
                 return this;
             }
 
             public Builder add_signal (SignalSpec signal) {
-                this.signals.add (signal);
+                this.signals.append (signal);
                 return this;
             }
 
             public Builder add_type (TypeSpec type) {
-                this.nested_types.add (type);
+                this.nested_types.append (type);
                 return this;
             }
 
@@ -279,13 +301,13 @@ namespace ValaPoet {
 
                 bool has_abstract_method = false;
                 foreach (var method in methods) {
-                    if (method.modifiers.contains (SymbolModifier.ABSTRACT)) {
+                    if (method.modifiers.find (SymbolModifier.ABSTRACT) != null) {
                         has_abstract_method = true;
                         break;
                     }
                 }
 
-                if (has_abstract_method && !modifiers.contains (SymbolModifier.ABSTRACT) && kind == Kind.CLASS) {
+                if (has_abstract_method && modifiers.find (SymbolModifier.ABSTRACT) == null && kind == Kind.CLASS) {
                     error ("class with abstract methods must be abstract");
                 }
 

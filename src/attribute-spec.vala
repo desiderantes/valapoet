@@ -21,14 +21,14 @@ namespace ValaPoet {
     public class AttributeSpec : GLib.Object {
 
         public string name { get; private set; }
-        public Gee.HashMap<string, CodeBlock> arguments { get; private set; }
+        public GLib.HashTable<string, CodeBlock> arguments { get; private set; }
 
         private AttributeSpec (Builder builder) {
             this.name = builder.name;
-            this.arguments = new Gee.HashMap<string, CodeBlock>();
-            foreach (var entry in builder.arguments.entries) {
-                this.arguments[entry.key] = entry.value;
-            }
+            this.arguments = new GLib.HashTable<string, CodeBlock> (str_hash, str_equal);
+            builder.arguments.foreach ((k, v) => {
+                this.arguments.insert (k, v);
+            });
         }
 
         public static Builder builder (string name) {
@@ -37,16 +37,16 @@ namespace ValaPoet {
 
         public class Builder : GLib.Object {
             public string name { get; private set; }
-            public Gee.HashMap<string, CodeBlock> arguments { get; private set; }
+            public GLib.HashTable<string, CodeBlock> arguments { get; private set; }
 
             public Builder (string name) {
                 this.name = name;
-                this.arguments = new Gee.HashMap<string, CodeBlock>();
+                this.arguments = new GLib.HashTable<string, CodeBlock> (str_hash, str_equal);
             }
 
             public Builder add_argument (string name, string format, ...) {
                 var va = va_list ();
-                arguments[name] = CodeBlock.of_valist (format, va);
+                arguments.insert (name, CodeBlock.of_valist (format, va));
                 return this;
             }
 

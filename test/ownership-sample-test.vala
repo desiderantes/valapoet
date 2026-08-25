@@ -29,6 +29,7 @@ public class OwnershipSampleTest : Object {
             var expected = """public class Node : GLib.Object {
 	public weak Node? parent;
 	public string data;
+
 	public unowned Node get_parent () {
 		return parent;
 	}

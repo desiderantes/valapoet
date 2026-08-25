@@ -30,17 +30,17 @@ namespace ValaPoet {
         public Kind kind { get; private set; }
         public string name { get; private set; }
         public CodeBlock valadoc { get; private set; }
-        public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-        public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+        public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
         public TypeName ? return_type { get; private set; }
-        public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
-        public Gee.ArrayList<CodeBlock> requires_contracts { get; private set; }
-        public Gee.ArrayList<CodeBlock> ensures_contracts { get; private set; }
+        public unowned GLib.List<ParameterSpec> parameters { get; private set; }
+        public unowned GLib.List<CodeBlock> requires_contracts { get; private set; }
+        public unowned GLib.List<CodeBlock> ensures_contracts { get; private set; }
         public CodeBlock code { get; private set; }
-        public Gee.ArrayList<TypeName> throws_errors { get; private set; }
+        public unowned GLib.List<TypeName> throws_errors { get; private set; }
         public TypeName ? explicit_interface { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
         public bool variadic { get; private set; }
 
         private MethodSpec (Builder builder) {
@@ -48,22 +48,36 @@ namespace ValaPoet {
             this.name = builder.name;
             this.visibility = builder.vis;
             this.valadoc = builder.valadoc.build ();
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
-            this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
-            this.type_variables = new Gee.ArrayList<TypeVariableName>();
-            this.type_variables.add_all (builder.type_variables);
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
+            this.type_variables = new GLib.List<TypeVariableName>();
+            foreach (var tv in builder.type_variables) {
+                this.type_variables.append (tv);
+            }
             this.return_type = builder.return_type;
-            this.parameters = new Gee.ArrayList<ParameterSpec>();
-            this.parameters.add_all (builder.parameters);
-            this.requires_contracts = new Gee.ArrayList<CodeBlock>();
-            this.requires_contracts.add_all (builder.requires_contracts);
-            this.ensures_contracts = new Gee.ArrayList<CodeBlock>();
-            this.ensures_contracts.add_all (builder.ensures_contracts);
+            this.parameters = new GLib.List<ParameterSpec>();
+            foreach (var p in builder.parameters) {
+                this.parameters.append (p);
+            }
+            this.requires_contracts = new GLib.List<CodeBlock>();
+            foreach (var rc in builder.requires_contracts) {
+                this.requires_contracts.append (rc);
+            }
+            this.ensures_contracts = new GLib.List<CodeBlock>();
+            foreach (var ec in builder.ensures_contracts) {
+                this.ensures_contracts.append (ec);
+            }
             this.code = builder.code.build ();
-            this.throws_errors = new Gee.ArrayList<TypeName>();
-            this.throws_errors.add_all (builder.throws_errs);
+            this.throws_errors = new GLib.List<TypeName>();
+            foreach (var te in builder.throws_errs) {
+                this.throws_errors.append (te);
+            }
             this.explicit_interface = builder.explicit_iface;
             this.variadic = builder.is_variadic;
         }
@@ -88,16 +102,16 @@ namespace ValaPoet {
             public Kind kind { get; private set; }
             public string name { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
-            public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
             public Visibility vis { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
-            public Gee.ArrayList<TypeVariableName> type_variables { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
             public TypeName ? return_type { get; private set; }
-            public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
-            public Gee.ArrayList<CodeBlock> requires_contracts { get; private set; }
-            public Gee.ArrayList<CodeBlock> ensures_contracts { get; private set; }
+            public unowned GLib.List<ParameterSpec> parameters { get; private set; }
+            public unowned GLib.List<CodeBlock> requires_contracts { get; private set; }
+            public unowned GLib.List<CodeBlock> ensures_contracts { get; private set; }
             public CodeBlock.Builder code { get; private set; }
-            public Gee.ArrayList<TypeName> throws_errs { get; private set; }
+            public unowned GLib.List<TypeName> throws_errs { get; private set; }
             public TypeName ? explicit_iface { get; private set; }
             public bool is_variadic { get; private set; }
 
@@ -106,20 +120,22 @@ namespace ValaPoet {
                 this.name = name;
                 this.vis = Visibility.NONE;
                 this.valadoc = new CodeBlock.Builder ();
-                this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
-                this.type_variables = new Gee.ArrayList<TypeVariableName>();
-                this.parameters = new Gee.ArrayList<ParameterSpec>();
-                this.requires_contracts = new Gee.ArrayList<CodeBlock>();
-                this.ensures_contracts = new Gee.ArrayList<CodeBlock>();
+                this.attributes = new GLib.List<AttributeSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
+                this.type_variables = new GLib.List<TypeVariableName>();
+                this.parameters = new GLib.List<ParameterSpec>();
+                this.requires_contracts = new GLib.List<CodeBlock>();
+                this.ensures_contracts = new GLib.List<CodeBlock>();
                 this.code = new CodeBlock.Builder ();
-                this.throws_errs = new Gee.ArrayList<TypeName>();
+                this.throws_errs = new GLib.List<TypeName>();
                 this.is_variadic = false;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.modifiers.add (m);
+                    if (this.modifiers.find (m) == null) {
+                        this.modifiers.append (m);
+                    }
                 }
                 return this;
             }
@@ -130,12 +146,12 @@ namespace ValaPoet {
             }
 
             public Builder add_type_variable (TypeVariableName tv) {
-                this.type_variables.add (tv);
+                this.type_variables.append (tv);
                 return this;
             }
 
             public Builder add_attribute (AttributeSpec attribute) {
-                this.annotations.add (attribute);
+                this.attributes.append (attribute);
                 return this;
             }
 
@@ -151,19 +167,19 @@ namespace ValaPoet {
             }
 
             public Builder add_parameter (ParameterSpec parameter) {
-                this.parameters.add (parameter);
+                this.parameters.append (parameter);
                 return this;
             }
 
             public Builder add_requires (string format, ...) {
                 var va = va_list ();
-                this.requires_contracts.add (CodeBlock.of_valist (format, va));
+                this.requires_contracts.append (CodeBlock.of_valist (format, va));
                 return this;
             }
 
             public Builder add_ensures (string format, ...) {
                 var va = va_list ();
-                this.ensures_contracts.add (CodeBlock.of_valist (format, va));
+                this.ensures_contracts.append (CodeBlock.of_valist (format, va));
                 return this;
             }
 
@@ -221,7 +237,7 @@ namespace ValaPoet {
             }
 
             public Builder add_throws (TypeName error_domain) {
-                this.throws_errs.add (error_domain);
+                this.throws_errs.append (error_domain);
                 return this;
             }
 
@@ -231,20 +247,46 @@ namespace ValaPoet {
             }
 
             public MethodSpec build () {
+                if (kind == Kind.DESTRUCTOR) {
+                    if (parameters != null && parameters.length () > 0) {
+                        error ("Destructor cannot have parameters.");
+                    }
+                    if (vis != Visibility.NONE) {
+                        error ("Destructor cannot have visibility qualifiers.");
+                    }
+                    if (modifiers != null && modifiers.length () > 0) {
+                        error ("Destructor cannot have modifiers.");
+                    }
+                    if (return_type != null) {
+                        error ("Destructor cannot specify a return type.");
+                    }
+                }
+
                 foreach (var m in modifiers) {
                     if (!m.targets_method ()) {
                         warning ("Modifier '%s' is not applicable to methods.", m.to_string ());
                     }
                 }
 
-                if (modifiers.contains (SymbolModifier.ABSTRACT) && !code.is_empty ()) {
+                if (modifiers.find (SymbolModifier.ABSTRACT) != null && !code.is_empty ()) {
                     error ("abstract method cannot have code");
                 }
 
-                for (var i = 0; i < parameters.size; i++) {
-                    if (parameters.get (i).is_params && i != parameters.size - 1) {
-                        error ("The 'params' modifier can only be applied to the last parameter of a method.");
+                bool has_params_parameter = false;
+                uint param_len = parameters.length ();
+                uint i = 0;
+                foreach (var param in parameters) {
+                    if (param.is_params) {
+                        has_params_parameter = true;
+                        if (i != param_len - 1) {
+                            error ("The 'params' modifier can only be applied to the last parameter of a method.");
+                        }
                     }
+                    i++;
+                }
+
+                if (is_variadic && has_params_parameter) {
+                    error ("A method cannot have both C-style varargs (...) and typesafe varargs ('params' modifier).");
                 }
                 return new MethodSpec (this);
             }

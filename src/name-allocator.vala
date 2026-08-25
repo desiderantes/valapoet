@@ -16,14 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-
 namespace ValaPoet {
 
     public class NameAllocator : GLib.Object {
 
-        private Gee.HashSet<string> allocated_names = new Gee.HashSet<string>();
-        private Gee.HashMap<Object, string> tag_to_name = new Gee.HashMap<Object, string>();
+        private GLib.List<string> allocated_names = new GLib.List<string>();
+        private GLib.HashTable<Object, string> tag_to_name = new GLib.HashTable<Object, string> (direct_hash, direct_equal);
 
         private static string[] UNESCAPABLE_KEYWORDS = {
             "true", "false", "null", "bool", "char", "uchar", "double", "float",
@@ -50,34 +48,34 @@ namespace ValaPoet {
             if (is_escapable_keyword (sanitized)) {
                 name = "@" + sanitized;
                 int index = 2;
-                while (allocated_names.contains (name)) {
+                while (allocated_names.find_custom (name, strcmp) != null) {
                     name = "@" + sanitized + "_" + index.to_string ();
                     index++;
                 }
             } else if (is_unescapable_keyword (sanitized)) {
                 name = "_" + sanitized;
                 int index = 2;
-                while (allocated_names.contains (name)) {
+                while (allocated_names.find_custom (name, strcmp) != null) {
                     name = "_" + sanitized + "_" + index.to_string ();
                     index++;
                 }
             } else {
                 int index = 2;
-                while (allocated_names.contains (name)) {
+                while (allocated_names.find_custom (name, strcmp) != null) {
                     name = sanitized + "_" + index.to_string ();
                     index++;
                 }
             }
 
-            allocated_names.add (name);
+            allocated_names.append (name);
             if (tag != null) {
-                tag_to_name[tag] = name;
+                tag_to_name.insert (tag, name);
             }
             return name;
         }
 
         public new string get (Object tag) {
-            return tag_to_name[tag];
+            return tag_to_name.lookup (tag);
         }
 
         private static string sanitize (string suggestion) {

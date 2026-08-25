@@ -49,25 +49,6 @@ valapoet_dep = declare_dependency(
     dependencies: dependencies,
 )
 
-# we should replace this with gnome.generate_gir()
-if g_ir_compiler.found()
-    custom_target(
-        'libvalapoet-typelib',
-        command: [
-            g_ir_compiler,
-            '--shared-library',
-            'libvalapoet-@0@.so'.format(API_VERSION),
-            '--output',
-            '@OUTPUT@',
-            meson.current_build_dir() / 'ValaPoet-' + API_VERSION + '.gir',
-        ],
-        output: 'ValaPoet-' + API_VERSION + '.typelib',
-        depends: libvalapoet,
-        install: true,
-        install_dir: join_paths(get_option('libdir'), 'girepository-1.0'),
-    )
-endif
-
 pkgconfig.generate(
     libvalapoet,
     subdirs: 'valapoet-' + API_VERSION,

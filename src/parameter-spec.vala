@@ -30,8 +30,8 @@ namespace ValaPoet {
 
         public string name { get; private set; }
         public TypeName type_name { get; private set; }
-        public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
         public ParameterDirection direction { get; private set; }
         public CodeBlock? default_value { get; private set; }
         public bool is_params { get; private set; }
@@ -39,10 +39,14 @@ namespace ValaPoet {
         private ParameterSpec (Builder builder) {
             this.name = builder.name;
             this.type_name = builder.type_name;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
-            this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
             this.direction = builder.param_dir;
             this.default_value = builder.default_val;
             this.is_params = builder.is_params;
@@ -55,8 +59,8 @@ namespace ValaPoet {
         public class Builder : GLib.Object {
             public string name { get; private set; }
             public TypeName type_name { get; private set; }
-            public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public ParameterDirection param_dir { get; private set; }
             public CodeBlock? default_val { get; private set; }
             public bool is_params { get; private set; }
@@ -64,20 +68,22 @@ namespace ValaPoet {
             public Builder (TypeName type_name, string name) {
                 this.type_name = type_name;
                 this.name = name;
-                this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
+                this.attributes = new GLib.List<AttributeSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
                 this.param_dir = ParameterDirection.IN;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var mod in modifiers) {
-                    this.modifiers.add (mod);
+                    if (this.modifiers.find (mod) == null) {
+                        this.modifiers.append (mod);
+                    }
                 }
                 return this;
             }
 
             public Builder add_attribute (AttributeSpec attribute) {
-                this.annotations.add (attribute);
+                this.attributes.append (attribute);
                 return this;
             }
 

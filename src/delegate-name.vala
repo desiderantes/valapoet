@@ -16,25 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-
 namespace ValaPoet {
 
     public class DelegateName : TypeName {
 
         public string name { get; private set; }
         public TypeName return_type { get; private set; }
-        public Gee.ArrayList<ParameterSpec> parameters { get; private set; }
+        public unowned GLib.List<ParameterSpec> parameters { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
 
-        public DelegateName (string name, TypeName return_type, Gee.ArrayList<ParameterSpec> ? parameters = null) {
+        public DelegateName (string name, TypeName return_type, GLib.List<ParameterSpec> ? parameters = null) {
             this.name = name;
             this.return_type = return_type;
-            this.parameters = (parameters != null) ? parameters : new Gee.ArrayList<ParameterSpec>();
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.parameters = new GLib.List<ParameterSpec>();
+            if (parameters != null) {
+                foreach (var p in parameters) {
+                    this.parameters.append (p);
+                }
+            }
+            this.attributes = new GLib.List<AttributeSpec>();
             this.visibility = Visibility.NONE;
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
+            this.modifiers = new GLib.List<SymbolModifier>();
         }
 
         public static new DelegateName get (string name, TypeName return_type) {
@@ -46,7 +49,9 @@ namespace ValaPoet {
                 if (!m.targets_delegate ()) {
                     warning ("Modifier '%s' is not applicable to delegates.", m.to_string ());
                 }
-                this.modifiers.add (m);
+                if (this.modifiers.find (m) == null) {
+                    this.modifiers.append (m);
+                }
             }
             return this;
         }
@@ -57,12 +62,12 @@ namespace ValaPoet {
         }
 
         public DelegateName add_parameter (ParameterSpec param) {
-            this.parameters.add (param);
+            this.parameters.append (param);
             return this;
         }
 
-        public DelegateName add_annotation (AttributeSpec attr) {
-            this.annotations.add (attr);
+        public DelegateName add_attribute (AttributeSpec attr) {
+            this.attributes.append (attr);
             return this;
         }
 
@@ -71,19 +76,31 @@ namespace ValaPoet {
         }
 
         public override TypeName copy () {
-            var copy_params = new Gee.ArrayList<ParameterSpec>();
-            copy_params.add_all (this.parameters);
+            var copy_params = new GLib.List<ParameterSpec>();
+            foreach (var p in this.parameters) {
+                copy_params.append (p);
+            }
             var copy = new DelegateName (this.name, this.return_type.copy (), copy_params);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
             copy.is_unowned = this.is_unowned;
             copy.is_owned = this.is_owned;
             copy.visibility = this.visibility;
-            copy.modifiers.add_all (this.modifiers);
-            foreach (var a in this.annotations) {
-                copy.annotations.add (a);
+            foreach (var m in this.modifiers) {
+                copy.modifiers.append (m);
+            }
+            foreach (var a in this.attributes) {
+                copy.attributes.append (a);
             }
             return copy;
+        }
+
+    }
+
+    public class DelegateSpec : GLib.Object {
+
+        public static DelegateName builder (string name, TypeName return_type) {
+            return DelegateName.get (name, return_type);
         }
 
     }

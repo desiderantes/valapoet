@@ -31,11 +31,11 @@ public class AsyncMethodSampleTest : Object {
 		return "https://example.com";
 	}
 
-	private async void fetch_internal () throws GLib.FileError, GLib.IOError {
-	}
-
 	public async void fetch_data_async () throws GLib.FileError, GLib.IOError {
 		yield fetch_internal ();
+	}
+
+	private async void fetch_internal () throws GLib.FileError, GLib.IOError {
 	}
 }
 """;

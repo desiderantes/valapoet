@@ -25,7 +25,7 @@ namespace ValaPoet {
 
         public PointerTypeName (TypeName pointed_to_type) {
             this.pointed_to_type = pointed_to_type;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.attributes = new GLib.List<AttributeSpec>();
         }
 
         public override string to_string () {
@@ -36,8 +36,8 @@ namespace ValaPoet {
             var copy = new PointerTypeName (this.pointed_to_type.copy ());
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
-            foreach (var a in this.annotations) {
-                copy.annotations.add (a);
+            foreach (var a in this.attributes) {
+                copy.attributes.append (a);
             }
             return copy;
         }

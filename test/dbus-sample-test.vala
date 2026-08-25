@@ -26,12 +26,13 @@ public class DBusSampleTest : Object {
         Test.init (ref args);
 
         Test.add_func ("/valapoet/dbus_sample", () => {
-            var expected = """[DBus(name = "org.example.DemoService")]
+            var expected = """[DBus (name = "org.example.DemoService")]
 public class DemoService : GLib.Object {
-	public signal void status_changed (string status);
 	public int counter {
 		get; set;
 	}
+	public signal void status_changed (string status);
+
 	public void execute_action (string action_name) {
 		counter++;
 		status_changed (action_name);

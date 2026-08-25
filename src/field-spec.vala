@@ -22,19 +22,23 @@ namespace ValaPoet {
 
         public string name { get; private set; }
         public TypeName type_name { get; private set; }
-        public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
         public CodeBlock ? initializer { get; private set; }
 
         private FieldSpec (Builder builder) {
             this.name = builder.name;
             this.type_name = builder.type_name;
             this.visibility = builder.vis;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
-            this.annotations.add_all (builder.annotations);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
             this.initializer = builder.initializer_block;
         }
 
@@ -46,21 +50,23 @@ namespace ValaPoet {
             public string name { get; private set; }
             public TypeName type_name { get; private set; }
             public Visibility vis { get; private set; }
-            public Gee.ArrayList<AttributeSpec> annotations { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public CodeBlock ? initializer_block { get; private set; }
 
             public Builder (TypeName type_name, string name) {
                 this.type_name = type_name;
                 this.name = name;
                 this.vis = Visibility.NONE;
-                this.annotations = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
+                this.attributes = new GLib.List<AttributeSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.modifiers.add (m);
+                    if (this.modifiers.find (m) == null) {
+                        this.modifiers.append (m);
+                    }
                 }
                 return this;
             }

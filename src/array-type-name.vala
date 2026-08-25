@@ -16,8 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-
 namespace ValaPoet {
 
     public class ArrayTypeName : TypeName {
@@ -28,7 +26,7 @@ namespace ValaPoet {
         public ArrayTypeName (TypeName component_type, int rank = 1) {
             this.component_type = component_type;
             this.rank = rank;
-            this.annotations = new Gee.ArrayList<AttributeSpec>();
+            this.attributes = new GLib.List<AttributeSpec>();
         }
 
         public ArrayTypeName.of (TypeName component_type, int rank = 1) {
@@ -48,8 +46,8 @@ namespace ValaPoet {
             var copy = new ArrayTypeName (this.component_type.copy (), this.rank);
             copy.is_nullable = this.is_nullable;
             copy.is_weak = this.is_weak;
-            foreach (var a in this.annotations) {
-                copy.annotations.add (a);
+            foreach (var a in this.attributes) {
+                copy.attributes.append (a);
             }
             return copy;
         }

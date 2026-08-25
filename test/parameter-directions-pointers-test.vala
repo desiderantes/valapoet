@@ -102,7 +102,7 @@ public class CustomHandler : BaseHandler {
 
         Test.add_func ("/valapoet/null_terminated_array_parameter", () => {
             var expected = """public class ExecHelper : GLib.Object {
-	public void run ([CCode(array_length = false, array_null_terminated = true)] string[] args) {
+	public void run ([CCode (array_length = false, array_null_terminated = true)] string[] args) {
 	}
 }
 """;
@@ -136,7 +136,7 @@ public class CustomHandler : BaseHandler {
 
         Test.add_func ("/valapoet/multiple_joined_parameter_attributes", () => {
             var expected = """public class MultiAttrHelper : GLib.Object {
-	public void run ([CCode(array_length = false, array_null_terminated = true), Version(since = "1.0")] string[] args) {
+	public void run ([CCode (array_length = false, array_null_terminated = true), Version (since = "1.0")] string[] args) {
 	}
 }
 """;

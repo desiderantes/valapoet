@@ -16,76 +16,87 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-using Gee;
-
 namespace ValaPoet {
 
     public class ValaWriter : GLib.Object {
 
-        private StringBuilder? _owned_sb = null;
         private unowned StringBuilder out_builder;
-        private string _indent;
+        private string indent;
         private int indent_level = 0;
         private bool trailing_newline = true;
 
         // State for import collection
         private string current_namespace = "";
-        private Gee.HashSet<string> usings;
+        private GLib.List<string> usings;
         private bool is_dry_run = false;
-        private Gee.HashSet<string> importable_types = new Gee.HashSet<string>();
-        private Gee.ArrayList<string> enclosing_type_names = new Gee.ArrayList<string>();
+        private GLib.List<string> importable_types = new GLib.List<string>();
+        private GLib.List<string> enclosing_type_names = new GLib.List<string>();
 
-        public ValaWriter (StringBuilder out_builder, string indent = "\t", Gee.HashSet<string>? usings = null) {
+        public ValaWriter (StringBuilder out_builder, string indent = "\t", GLib.List<string>? usings = null) {
             this.out_builder = out_builder;
-            this._indent = indent;
-            this.usings = (usings != null) ? usings : new Gee.HashSet<string>();
+            this.indent = indent;
+            this.usings = new GLib.List<string>();
+            if (usings != null) {
+                foreach (var u in usings) {
+                    if (this.usings.find_custom (u, strcmp) == null) {
+                        this.usings.append (u);
+                    }
+                }
+            }
         }
 
-        public ValaWriter.dry_run () {
-            var sb = new StringBuilder ();
-            this._owned_sb = (owned) sb;
-            this.out_builder = this._owned_sb;
-            this._indent = "\t";
-            this.usings = new Gee.HashSet<string>();
+        public ValaWriter.dry_run (StringBuilder out_builder) {
+            this (out_builder, "\t", new GLib.List<string>());
             this.is_dry_run = true;
         }
 
-        public Gee.HashSet<string> get_importable_types () {
+        public unowned GLib.List<string> get_importable_types () {
             return this.importable_types;
         }
 
         public void emit_file (ValaFile vala_file) {
         // Collect imports in dry run first
-            var dry_writer = new ValaWriter.dry_run ();
+            var dry_sb = new StringBuilder();
+            var dry_writer = new ValaWriter.dry_run (dry_sb);
             foreach (var m in vala_file.members) {
                 dry_writer.emit_member (m);
             }
 
-            var all_usings = new Gee.HashSet<string>();
-            all_usings.add_all (vala_file.usings);
+            var all_usings = new GLib.List<string>();
+            foreach (var u in vala_file.usings) {
+                if (all_usings.find_custom (u, strcmp) == null) {
+                    all_usings.append (u);
+                }
+            }
             foreach (var imp in dry_writer.get_importable_types ()) {
                 if (imp != "" && imp != "GLib") {
-                    all_usings.add (imp);
+                    if (all_usings.find_custom (imp, strcmp) == null) {
+                        all_usings.append (imp);
+                    }
                 }
             }
 
-            this.usings.add_all (all_usings);
+            foreach (var u in all_usings) {
+                if (this.usings.find_custom (u, strcmp) == null) {
+                    this.usings.append (u);
+                }
+            }
 
-            if (!all_usings.is_empty) {
-                var sorted_usings = new Gee.ArrayList<string>();
-                sorted_usings.add_all (all_usings);
-                sorted_usings.sort ();
-                foreach (var u in sorted_usings) {
+            if (all_usings != null && all_usings.length () > 0) {
+                all_usings.sort (strcmp);
+                foreach (var u in all_usings) {
                     emit ("using %s;\n", u);
                 }
                 emit ("\n");
             }
 
-            for (int i = 0; i < vala_file.members.size; i++) {
+            uint i = 0;
+            foreach (var m in vala_file.members) {
                 if (i > 0) {
                     emit ("\n");
                 }
-                emit_member (vala_file.members.get (i));
+                emit_member (m);
+                i++;
             }
         }
 
@@ -112,7 +123,7 @@ namespace ValaPoet {
             emit_symbol_modifiers (type_spec.modifiers);
 
             if (type_spec.kind != TypeSpec.Kind.NAMESPACE) {
-                enclosing_type_names.add (type_spec.name);
+                enclosing_type_names.append (type_spec.name);
             }
 
             switch (type_spec.kind) {
@@ -136,25 +147,27 @@ namespace ValaPoet {
                     break;
             }
 
-            if (!type_spec.type_variables.is_empty) {
+            if (type_spec.type_variables != null && type_spec.type_variables.length () > 0) {
                 emit ("<");
-                for (int i = 0; i < type_spec.type_variables.size; i++) {
-                    if (i > 0)emit (", ");
-                    emit (type_spec.type_variables.get (i).to_string ());
+                uint i = 0;
+                foreach (var tv in type_spec.type_variables) {
+                    if (i > 0) emit (", ");
+                    emit (tv.to_string ());
+                    i++;
                 }
                 emit (">");
             }
 
-            if (type_spec.superclass != null || !type_spec.superinterfaces.is_empty) {
+            if (type_spec.superclass != null || (type_spec.superinterfaces != null && type_spec.superinterfaces.length () > 0)) {
                 emit (" : ");
-                var super_types = new Gee.ArrayList<string>();
+                string[] super_types = {};
                 if (type_spec.superclass != null) {
-                    super_types.add (lookup_name (type_spec.superclass));
+                    super_types += lookup_name (type_spec.superclass);
                 }
                 foreach (var iface in type_spec.superinterfaces) {
-                    super_types.add (lookup_name (iface));
+                    super_types += lookup_name (iface);
                 }
-                emit ("%s", string.joinv (", ", (string[]) super_types.to_array ()));
+                emit ("%s", string.joinv (", ", super_types));
             }
 
             emit (" {\n");
@@ -173,19 +186,28 @@ namespace ValaPoet {
             }
 
             // Emit error domain / enum codes if present
-            for (int i = 0; i < type_spec.error_codes.size; i++) {
-                if (i > 0)emit (",\n");
-                emit ("%s", type_spec.error_codes.get (i));
-                if (i == type_spec.error_codes.size - 1) {
-                    emit ("\n");
+            if (type_spec.error_codes != null && type_spec.error_codes.length () > 0) {
+                uint ec_len = type_spec.error_codes.length ();
+                uint i = 0;
+                foreach (var ec in type_spec.error_codes) {
+                    if (i > 0) emit (",\n");
+                    emit ("%s", ec);
+                    if (i == ec_len - 1) {
+                        emit ("\n");
+                    }
+                    i++;
                 }
             }
 
             // Emit enum constants if present
-            if (!type_spec.enum_constants.is_empty) {
-                bool has_members = !type_spec.methods.is_empty || !type_spec.fields.is_empty || !type_spec.properties.is_empty || !type_spec.nested_types.is_empty;
-                for (int i = 0; i < type_spec.enum_constants.size; i++) {
-                    var c = type_spec.enum_constants.get (i);
+            if (type_spec.enum_constants != null && type_spec.enum_constants.length () > 0) {
+                bool has_members = (type_spec.methods != null && type_spec.methods.length () > 0) ||
+                                   (type_spec.fields != null && type_spec.fields.length () > 0) ||
+                                   (type_spec.properties != null && type_spec.properties.length () > 0) ||
+                                   (type_spec.nested_types != null && type_spec.nested_types.length () > 0);
+                uint enc_len = type_spec.enum_constants.length ();
+                uint i = 0;
+                foreach (var c in type_spec.enum_constants) {
                     if (c.valadoc != null) {
                         emit_code_block (c.valadoc);
                     }
@@ -193,17 +215,29 @@ namespace ValaPoet {
                     if (c.value != null) {
                         emit (" = %d", c.value);
                     }
-                    if (i < type_spec.enum_constants.size - 1) {
+                    if (i < enc_len - 1) {
                         emit (",\n");
                     } else if (has_members) {
                         emit (";\n\n");
                     } else {
                         emit ("\n");
                     }
+                    i++;
                 }
             }
 
-            // Emit construct blocks if present
+            // Emit members inside type
+            foreach (var f in type_spec.fields) {
+                emit_field (f);
+            }
+            foreach (var p in type_spec.properties) {
+                emit_property (p);
+            }
+            foreach (var sig in type_spec.signals) {
+                emit_signal (sig);
+            }
+
+            // Emit construct blocks
             if (type_spec.static_construct_block != null) {
                 emit ("static construct {\n");
                 increase_indent ();
@@ -226,32 +260,77 @@ namespace ValaPoet {
                 emit ("}\n");
             }
 
-            // Emit members inside type
-            foreach (var sig in type_spec.signals) {
-                emit_signal (sig);
-            }
-            foreach (var f in type_spec.fields) {
-                emit_field (f);
-            }
-            foreach (var p in type_spec.properties) {
-                emit_property (p);
-            }
-            for (int i = 0; i < type_spec.methods.size; i++) {
-                if (i > 0) {
-                    emit ("\n");
+            bool emitted_previous = (type_spec.fields != null && type_spec.fields.length () > 0) ||
+                                    (type_spec.properties != null && type_spec.properties.length () > 0) ||
+                                    (type_spec.signals != null && type_spec.signals.length () > 0) ||
+                                    type_spec.static_construct_block != null ||
+                                    type_spec.class_construct_block != null ||
+                                    type_spec.construct_block != null;
+
+            // Separate constructors/destructors from regular methods
+            var ctors = new GLib.List<MethodSpec>();
+            var regular_methods = new GLib.List<MethodSpec>();
+            foreach (var m in type_spec.methods) {
+                if (m.kind != MethodSpec.Kind.METHOD) {
+                    ctors.append (m);
+                } else {
+                    regular_methods.append (m);
                 }
-                emit_method (type_spec.methods.get (i), type_spec.name);
-            }
-            // Emit nested types with proper newline spacing between definitions
-            for (int i = 0; i < type_spec.nested_types.size; i++) {
-                if (i > 0 || !type_spec.methods.is_empty || !type_spec.fields.is_empty || !type_spec.properties.is_empty) {
-                    emit ("\n");
-                }
-                emit_type_spec (type_spec.nested_types.get (i));
             }
 
-            if (type_spec.kind != TypeSpec.Kind.NAMESPACE && !enclosing_type_names.is_empty) {
-                enclosing_type_names.remove_at (enclosing_type_names.size - 1);
+            // Emit constructors & destructors
+            uint ctor_i = 0;
+            foreach (var ctor in ctors) {
+                if (ctor_i > 0 || emitted_previous) {
+                    emit ("\n");
+                }
+                emit_method (ctor, type_spec.name);
+                emitted_previous = true;
+                ctor_i++;
+            }
+
+            // Group regular methods by visibility and staticness
+            // 0: PUBLIC instance, 1: NONE instance, 2: PROTECTED instance, 3: INTERNAL instance, 4: PRIVATE instance
+            // 5: PUBLIC static,   6: NONE static,   7: PROTECTED static,   8: INTERNAL static,   9: PRIVATE static
+            GLib.List<MethodSpec>[] buckets = new GLib.List<MethodSpec>[10];
+            for (int k = 0; k < 10; k++) {
+                buckets[k] = new GLib.List<MethodSpec>();
+            }
+
+            foreach (var m in regular_methods) {
+                bool is_static = m.modifiers.find (SymbolModifier.STATIC) != null;
+                int base_idx = is_static ? 5 : 0;
+                int vis_offset = 0;
+                switch (m.visibility) {
+                    case Visibility.PUBLIC: vis_offset = 0; break;
+                    case Visibility.NONE: vis_offset = 1; break;
+                    case Visibility.PROTECTED: vis_offset = 2; break;
+                    case Visibility.INTERNAL: vis_offset = 3; break;
+                    case Visibility.PRIVATE: vis_offset = 4; break;
+                }
+                buckets[base_idx + vis_offset].append (m);
+            }
+
+            foreach (unowned var bucket in buckets) {
+                foreach (var m in bucket) {
+                    if (emitted_previous) {
+                        emit ("\n");
+                    }
+                    emit_method (m, type_spec.name);
+                    emitted_previous = true;
+                }
+            }
+            // Emit nested types with proper newline spacing
+            foreach (var nt in type_spec.nested_types) {
+                if (emitted_previous) {
+                    emit ("\n");
+                }
+                emit_type_spec (nt);
+                emitted_previous = true;
+            }
+
+            if (type_spec.kind != TypeSpec.Kind.NAMESPACE && enclosing_type_names != null && enclosing_type_names.length () > 0) {
+                enclosing_type_names.remove_link (enclosing_type_names.last ());
             }
 
             current_namespace = previous_ns;
@@ -337,7 +416,7 @@ namespace ValaPoet {
 
         public void emit_method (MethodSpec method_spec, string enclosing_name = "") {
             emit_valadoc (method_spec.valadoc);
-            emit_attributes (method_spec.annotations);
+            emit_attributes (method_spec.attributes);
             emit_visibility (method_spec.visibility);
             emit_symbol_modifiers (method_spec.modifiers);
 
@@ -359,55 +438,60 @@ namespace ValaPoet {
                 emit ("~%s", ctor_name);
             }
 
-            if (!method_spec.type_variables.is_empty) {
+            if (method_spec.type_variables != null && method_spec.type_variables.length () > 0) {
                 emit ("<");
-                for (int i = 0; i < method_spec.type_variables.size; i++) {
-                    if (i > 0)emit (", ");
-                    emit (method_spec.type_variables.get (i).to_string ());
+                uint i = 0;
+                foreach (var tv in method_spec.type_variables) {
+                    if (i > 0) emit (", ");
+                    emit (tv.to_string ());
+                    i++;
                 }
                 emit (">");
             }
 
             emit (" (");
 
-            for (int i = 0; i < method_spec.parameters.size; i++) {
-                if (i > 0)emit (", ");
-                var param = method_spec.parameters.get (i);
-                emit_attributes (param.annotations, true);
-                emit_symbol_modifiers (param.modifiers);
-                if (param.direction == ParameterDirection.OUT) {
-                    emit ("out ");
-                } else if (param.direction == ParameterDirection.REF) {
-                    emit ("ref ");
-                }
-                if (param.is_params) {
-                    emit ("params ");
-                }
-                emit ("%s %s", lookup_name (param.type_name), param.name);
-                if (param.default_value != null) {
-                    emit (" = ");
-                    emit_code_block (param.default_value);
+            if (method_spec.parameters != null && method_spec.parameters.length () > 0) {
+                uint i = 0;
+                foreach (var param in method_spec.parameters) {
+                    if (i > 0) emit (", ");
+                    emit_attributes (param.attributes, true);
+                    emit_symbol_modifiers (param.modifiers);
+                    if (param.direction == ParameterDirection.OUT) {
+                        emit ("out ");
+                    } else if (param.direction == ParameterDirection.REF) {
+                        emit ("ref ");
+                    }
+                    if (param.is_params) {
+                        emit ("params ");
+                    }
+                    emit ("%s %s", lookup_name (param.type_name), param.name);
+                    if (param.default_value != null) {
+                        emit (" = ");
+                        emit_code_block (param.default_value);
+                    }
+                    i++;
                 }
             }
             if (method_spec.variadic) {
-                if (method_spec.parameters.size > 0) {
+                if (method_spec.parameters != null && method_spec.parameters.length () > 0) {
                     emit (", ");
                 }
                 emit ("...");
             }
             emit (")");
 
-            if (!method_spec.throws_errors.is_empty) {
+            if (method_spec.throws_errors != null && method_spec.throws_errors.length () > 0) {
                 emit (" throws ");
-                var errs = new Gee.ArrayList<string>();
+                string[] errs = {};
                 foreach (var err in method_spec.throws_errors) {
-                    errs.add (lookup_name (err));
+                    errs += lookup_name (err);
                 }
-                emit ("%s", string.joinv (", ", (string[]) errs.to_array ()));
+                emit ("%s", string.joinv (", ", errs));
             }
 
             // Contract programming (requires / ensures)
-            if (!method_spec.requires_contracts.is_empty) {
+            if (method_spec.requires_contracts != null && method_spec.requires_contracts.length () > 0) {
                 foreach (var req in method_spec.requires_contracts) {
                     emit ("\n");
                     emit ("requires (");
@@ -415,7 +499,7 @@ namespace ValaPoet {
                     emit (")");
                 }
             }
-            if (!method_spec.ensures_contracts.is_empty) {
+            if (method_spec.ensures_contracts != null && method_spec.ensures_contracts.length () > 0) {
                 foreach (var ens in method_spec.ensures_contracts) {
                     emit ("\n");
                     emit ("ensures (");
@@ -424,7 +508,7 @@ namespace ValaPoet {
                 }
             }
 
-            if (method_spec.modifiers.contains (SymbolModifier.ABSTRACT)) {
+            if (method_spec.modifiers != null && method_spec.modifiers.find (SymbolModifier.ABSTRACT) != null) {
                 emit (";\n");
             } else {
                 emit (" {\n");
@@ -446,17 +530,20 @@ namespace ValaPoet {
                 emit ("void ");
             }
             emit ("%s (", signal_spec.name);
-            for (int i = 0; i < signal_spec.parameters.size; i++) {
-                if (i > 0)emit (", ");
-                var p = signal_spec.parameters.get (i);
-                emit_attributes (p.annotations, true);
-                emit ("%s %s", lookup_name (p.type_name), p.name);
+            if (signal_spec.parameters != null && signal_spec.parameters.length () > 0) {
+                uint i = 0;
+                foreach (var p in signal_spec.parameters) {
+                    if (i > 0) emit (", ");
+                    emit_attributes (p.attributes, true);
+                    emit ("%s %s", lookup_name (p.type_name), p.name);
+                    i++;
+                }
             }
             emit (");\n");
         }
 
         public void emit_field (FieldSpec field_spec) {
-            emit_attributes (field_spec.annotations);
+            emit_attributes (field_spec.attributes);
             emit_visibility (field_spec.visibility);
             emit_symbol_modifiers (field_spec.modifiers);
             emit ("%s %s", lookup_name (field_spec.type_name), field_spec.name);
@@ -471,7 +558,7 @@ namespace ValaPoet {
             if (valadoc == null || valadoc.is_empty ())return;
             emit ("/**\n");
             var sb = new StringBuilder ();
-            var temp_writer = new ValaWriter (sb, _indent, usings);
+            var temp_writer = new ValaWriter (sb, indent, usings);
             temp_writer.emit_code_block (valadoc);
             var doc_lines = sb.str.split ("\n");
             foreach (var line in doc_lines) {
@@ -482,14 +569,16 @@ namespace ValaPoet {
             emit (" */\n");
         }
 
-        public void emit_attributes (Gee.ArrayList<AttributeSpec> attributes, bool inline_attr = false) {
-            if (attributes.is_empty) return;
+        public void emit_attributes (GLib.List<AttributeSpec> attributes, bool inline_attr = false) {
+            if (attributes == null || attributes.length () == 0) return;
 
             if (inline_attr) {
                 emit ("[");
-                for (int i = 0; i < attributes.size; i++) {
+                uint i = 0;
+                foreach (var attr in attributes) {
                     if (i > 0) emit (", ");
-                    emit_single_attribute_content (attributes.get (i));
+                    emit_single_attribute_content (attr);
+                    i++;
                 }
                 emit ("] ");
             } else {
@@ -503,13 +592,18 @@ namespace ValaPoet {
 
         private void emit_single_attribute_content (AttributeSpec attr) {
             emit (attr.name);
-            if (!attr.arguments.is_empty) {
-                emit ("(");
+            if (attr.arguments != null && attr.arguments.size () > 0) {
+                emit (" (");
+                GLib.List<string> keys = new GLib.List<string>();
+                attr.arguments.foreach ((k, v) => {
+                    keys.append (k);
+                });
+                keys.sort (strcmp);
                 int idx = 0;
-                foreach (var entry in attr.arguments.entries) {
+                foreach (var k in keys) {
                     if (idx > 0) emit (", ");
-                    emit ("%s = ", entry.key);
-                    emit_code_block (entry.value);
+                    emit ("%s = ", k);
+                    emit_code_block (attr.arguments.lookup (k));
                     idx++;
                 }
                 emit (")");
@@ -517,15 +611,18 @@ namespace ValaPoet {
         }
 
         public void emit_delegate (DelegateName delegate_spec) {
-            emit_attributes (delegate_spec.annotations);
+            emit_attributes (delegate_spec.attributes);
             emit_visibility (delegate_spec.visibility);
             emit_symbol_modifiers (delegate_spec.modifiers);
             emit ("delegate %s %s (", lookup_name (delegate_spec.return_type), delegate_spec.name);
-            for (int i = 0; i < delegate_spec.parameters.size; i++) {
-                if (i > 0)emit (", ");
-                var param = delegate_spec.parameters.get (i);
-                emit_attributes (param.annotations, true);
-                emit ("%s %s", lookup_name (param.type_name), param.name);
+            if (delegate_spec.parameters != null && delegate_spec.parameters.length () > 0) {
+                uint i = 0;
+                foreach (var param in delegate_spec.parameters) {
+                    if (i > 0) emit (", ");
+                    emit_attributes (param.attributes, true);
+                    emit ("%s %s", lookup_name (param.type_name), param.name);
+                    i++;
+                }
             }
             emit (");\n");
         }
@@ -542,12 +639,13 @@ namespace ValaPoet {
                 } else if (part == "$]") {
                 // line statement end
                 } else if (part == "$W") {
-                    emit (" ");                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // wrapping space
+                    emit (" "); // wrapping space
                 } else if (part == "$Z") {
                 // zero-width space
                 } else if (part == "$L" || part == "$S" || part == "$T" || part == "$N") {
-                    if (arg_index < code_block.args.size) {
-                        var val = code_block.args.get (arg_index++);
+                    if (code_block.args != null && arg_index < code_block.args.length ()) {
+                        unowned GLib.List<Value ?> node = code_block.args.nth (arg_index++);
+                        var val = (node != null) ? node.data : null;
                         if (val != null) {
                             if (val.holds (typeof (string))) {
                                 string str = val.get_string ();
@@ -591,20 +689,22 @@ namespace ValaPoet {
             if (type is ClassName) {
                 var cn = (ClassName) type;
                 if (cn.namespace_name != "") {
-                    importable_types.add (cn.namespace_name);
+                    if (importable_types.find_custom (cn.namespace_name, strcmp) == null) {
+                        importable_types.append (cn.namespace_name);
+                    }
                 }
                 res = cn.simple_name;
-                bool collides = cn.simple_name != "" && enclosing_type_names.contains (cn.simple_name);
-                if (collides || (cn.namespace_name != "" && !usings.contains (cn.namespace_name) && current_namespace != cn.namespace_name)) {
+                bool collides = cn.simple_name != "" && enclosing_type_names.find_custom (cn.simple_name, strcmp) != null;
+                if (collides || (cn.namespace_name != "" && usings.find_custom (cn.namespace_name, strcmp) == null && current_namespace != cn.namespace_name)) {
                     res = cn.canonical_name;
                 }
             } else if (type is ParameterizedTypeName) {
                 var ptn = (ParameterizedTypeName) type;
-                var args_str = new Gee.ArrayList<string>();
+                string[] args_str = {};
                 foreach (var arg in ptn.type_arguments) {
-                    args_str.add (lookup_name (arg));
+                    args_str += lookup_name (arg);
                 }
-                res = lookup_name (ptn.raw_type) + "<" + string.joinv (", ", (string[]) args_str.to_array ()) + ">";
+                res = lookup_name (ptn.raw_type) + "<" + string.joinv (", ", args_str) + ">";
             } else if (type is ArrayTypeName) {
                 var atn = (ArrayTypeName) type;
                 var commas = new string[atn.rank];
@@ -634,12 +734,12 @@ namespace ValaPoet {
             }
         }
 
-        public void emit_symbol_modifiers (Gee.HashSet<SymbolModifier> modifiers) {
+        public void emit_symbol_modifiers (GLib.List<SymbolModifier> modifiers) {
+            if (modifiers == null) return;
             foreach (var m in modifiers) {
                 emit ("%s ", m.to_string ());
             }
         }
-
 
         [PrintfFormat ()]
         public void emit (string format, ...) {
@@ -675,7 +775,7 @@ namespace ValaPoet {
 
         private void emit_indent () {
             for (int i = 0; i < indent_level; i++) {
-                out_builder.append (_indent);
+                out_builder.append (indent);
             }
         }
 

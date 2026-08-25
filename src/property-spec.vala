@@ -22,15 +22,15 @@ namespace ValaPoet {
 
         public string name { get; private set; }
         public TypeName type_name { get; private set; }
-        public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
+        public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public Visibility visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
         public CodeBlock? get_body { get; private set; }
         public Visibility get_visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> get_modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> get_modifiers { get; private set; }
         public CodeBlock? set_body { get; private set; }
         public Visibility set_visibility { get; private set; }
-        public Gee.HashSet<SymbolModifier> set_modifiers { get; private set; }
+        public unowned GLib.List<SymbolModifier> set_modifiers { get; private set; }
         public CodeBlock? construct_body { get; private set; }
         public bool is_construct_set { get; private set; }
         public CodeBlock? default_value { get; private set; }
@@ -42,18 +42,26 @@ namespace ValaPoet {
             this.name = builder.name;
             this.type_name = builder.type_name;
             this.visibility = builder.vis;
-            this.attributes = new Gee.ArrayList<AttributeSpec>();
-            this.attributes.add_all (builder.attributes);
-            this.modifiers = new Gee.HashSet<SymbolModifier>();
-            this.modifiers.add_all (builder.modifiers);
+            this.attributes = new GLib.List<AttributeSpec>();
+            foreach (var a in builder.attributes) {
+                this.attributes.append (a);
+            }
+            this.modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.modifiers) {
+                this.modifiers.append (m);
+            }
             this.get_body = builder.get_body_block;
             this.get_visibility = builder.get_vis;
-            this.get_modifiers = new Gee.HashSet<SymbolModifier>();
-            this.get_modifiers.add_all (builder.get_modifiers);
+            this.get_modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.get_modifiers) {
+                this.get_modifiers.append (m);
+            }
             this.set_body = builder.set_body_block;
             this.set_visibility = builder.set_vis;
-            this.set_modifiers = new Gee.HashSet<SymbolModifier>();
-            this.set_modifiers.add_all (builder.set_modifiers);
+            this.set_modifiers = new GLib.List<SymbolModifier>();
+            foreach (var m in builder.set_modifiers) {
+                this.set_modifiers.append (m);
+            }
             this.construct_body = builder.construct_body_block;
             this.is_construct_set = builder.is_construct_set;
             this.default_value = builder.default_val;
@@ -70,14 +78,14 @@ namespace ValaPoet {
             public string name { get; private set; }
             public TypeName type_name { get; private set; }
             public Visibility vis { get; private set; }
-            public Gee.ArrayList<AttributeSpec> attributes { get; private set; }
-            public Gee.HashSet<SymbolModifier> modifiers { get; private set; }
+            public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+            public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public CodeBlock? get_body_block { get; private set; }
             public Visibility get_vis { get; private set; }
-            public Gee.HashSet<SymbolModifier> get_modifiers { get; private set; }
+            public unowned GLib.List<SymbolModifier> get_modifiers { get; private set; }
             public CodeBlock? set_body_block { get; private set; }
             public Visibility set_vis { get; private set; }
-            public Gee.HashSet<SymbolModifier> set_modifiers { get; private set; }
+            public unowned GLib.List<SymbolModifier> set_modifiers { get; private set; }
             public CodeBlock? construct_body_block { get; private set; }
             public bool is_construct_set { get; private set; }
             public CodeBlock? default_val { get; private set; }
@@ -91,15 +99,17 @@ namespace ValaPoet {
                 this.vis = Visibility.NONE;
                 this.get_vis = Visibility.NONE;
                 this.set_vis = Visibility.NONE;
-                this.attributes = new Gee.ArrayList<AttributeSpec>();
-                this.modifiers = new Gee.HashSet<SymbolModifier>();
-                this.get_modifiers = new Gee.HashSet<SymbolModifier>();
-                this.set_modifiers = new Gee.HashSet<SymbolModifier>();
+                this.attributes = new GLib.List<AttributeSpec>();
+                this.modifiers = new GLib.List<SymbolModifier>();
+                this.get_modifiers = new GLib.List<SymbolModifier>();
+                this.set_modifiers = new GLib.List<SymbolModifier>();
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.modifiers.add (m);
+                    if (this.modifiers.find (m) == null) {
+                        this.modifiers.append (m);
+                    }
                 }
                 return this;
             }
@@ -110,7 +120,7 @@ namespace ValaPoet {
             }
 
             public Builder add_attribute (AttributeSpec attribute) {
-                this.attributes.add (attribute);
+                this.attributes.append (attribute);
                 return this;
             }
 
@@ -121,7 +131,9 @@ namespace ValaPoet {
 
             public Builder add_get_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.get_modifiers.add (m);
+                    if (this.get_modifiers.find (m) == null) {
+                        this.get_modifiers.append (m);
+                    }
                 }
                 return this;
             }
@@ -133,7 +145,9 @@ namespace ValaPoet {
 
             public Builder add_set_modifiers (params SymbolModifier[] modifiers) {
                 foreach (var m in modifiers) {
-                    this.set_modifiers.add (m);
+                    if (this.set_modifiers.find (m) == null) {
+                        this.set_modifiers.append (m);
+                    }
                 }
                 return this;
             }

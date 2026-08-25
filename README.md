@@ -12,7 +12,8 @@ Here is how you generate a standard Vala `HelloWorld` program:
 
 ```vala
 var main_method = MethodSpec.method_builder ("main")
-    .add_modifiers (ValaModifier.PUBLIC, ValaModifier.STATIC)
+    .visibility (Visibility.PUBLIC)
+    .add_modifiers (SymbolModifier.STATIC)
     .returns (TypeName.INT)
     .add_parameter (ParameterSpec.builder (new ArrayTypeName (TypeName.STRING), "args").build ())
     .add_statement ("stdout.printf (\"Hello, ValaPoet!\\n\")")
@@ -20,7 +21,7 @@ var main_method = MethodSpec.method_builder ("main")
     .build ();
 
 var hello_world_class = TypeSpec.class_builder ("HelloWorld")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .superclass (TypeName.OBJECT)
     .add_method (main_method)
     .build ();
@@ -111,19 +112,19 @@ var node_type = ClassName.get ("", "Node").copy ();
 
 // Weak & Nullable field: public weak Node? parent;
 var parent_field = FieldSpec.builder (node_type.@weak ().nullable (), "parent")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .build ();
 
 // Unowned return type: public unowned Node get_parent ()
 var get_parent = MethodSpec.method_builder ("get_parent")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .returns (node_type.@unowned ())
     .add_statement ("return parent")
     .build ();
 
 // Owned parameter: set_data (owned string data)
 var set_data = MethodSpec.method_builder ("set_data")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_parameter (ParameterSpec.builder (TypeName.STRING.copy ().@owned (), "data").build ())
     .add_statement ("this.data = (owned) data")
     .build ();
@@ -135,7 +136,7 @@ Generate auto-properties or properties with custom accessors and default values:
 ```vala
 // Auto-property with default value
 var age_prop = PropertySpec.builder (TypeName.INT, "age")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .auto ()
     .default_value ("32")
     .build ();
@@ -145,8 +146,8 @@ var get_body = CodeBlock.builder ().add_statement ("return _name").build ();
 var set_body = CodeBlock.builder ().add_statement ("_name = value").build ();
 
 var name_prop = PropertySpec.builder (TypeName.STRING, "name")
-    .add_modifiers (ValaModifier.PUBLIC)
-    .add_set_modifiers (ValaModifier.PRIVATE)
+    .visibility (Visibility.PUBLIC)
+    .set_visibility (Visibility.PRIVATE)
     .get_body (get_body)
     .set_body (set_body)
     .build ();
@@ -157,7 +158,7 @@ Declare signals with parameter signatures and code attributes:
 
 ```vala
 var activated_signal = SignalSpec.builder ("activated")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_parameter (ParameterSpec.builder (TypeName.INT, "value").build ())
     .add_attribute (AttributeSpec.builder ("Signal").add_argument ("action", "true").build ())
     .build ();
@@ -171,7 +172,7 @@ var static_block = CodeBlock.builder ().add_statement ("stdout.printf (\"Static 
 var instance_block = CodeBlock.builder ().add_statement ("stdout.printf (\"Construct block\\n\")").build ();
 
 var named_ctor = MethodSpec.named_constructor_builder ("from_file")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_parameter (ParameterSpec.builder (ClassName.get ("GLib", "File"), "file").build ())
     .add_statement ("this.path = file.get_path ()")
     .build ();
@@ -181,7 +182,7 @@ var dtor = MethodSpec.destructor_builder ()
     .build ();
 
 var widget_class = TypeSpec.class_builder ("Widget")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .superclass (TypeName.OBJECT)
     .set_static_construct_block (static_block)
     .set_construct_block (instance_block)
@@ -195,7 +196,7 @@ Add preconditions and postconditions directly to method builders:
 
 ```vala
 var safe_divide = MethodSpec.method_builder ("safe_divide")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .returns (TypeName.DOUBLE)
     .add_parameter (ParameterSpec.builder (TypeName.DOUBLE, "numerator").build ())
     .add_parameter (ParameterSpec.builder (TypeName.DOUBLE, "denominator").build ())
@@ -210,13 +211,13 @@ Define error domains and attach exception specifications to methods:
 
 ```vala
 var file_error_domain = TypeSpec.error_domain_builder ("FileError")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_error_code ("NOT_FOUND")
     .add_error_code ("PERMISSION_DENIED")
     .build ();
 
 var read_file = MethodSpec.method_builder ("read_file")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_throws (ClassName.get ("", "FileError"))
     .add_statement ("throw new FileError.NOT_FOUND (\"File not found\")")
     .build ();
@@ -229,7 +230,7 @@ Declare type variables and generic type bounds:
 var type_t = TypeVariableName.get ("T");
 
 var container_class = TypeSpec.class_builder ("Container")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .superclass (TypeName.OBJECT)
     .add_type_variable (type_t)
     .build ();
@@ -241,7 +242,7 @@ Define Vala callback delegates with custom parameter signatures and CCode attrib
 ```vala
 var callback_delegate = DelegateName.get ("Callback", TypeName.VOID)
     .add_parameter (ParameterSpec.builder (TypeName.INT, "id").build ())
-    .add_annotation (AttributeSpec.builder ("CCode").add_argument ("has_target", "false").build ());
+    .add_attribute (AttributeSpec.builder ("CCode").add_argument ("has_target", "false").build ());
 ```
 
 ### 9. Parameter Directions (`out`, `ref`), Pointers & Multi-Dimensional Arrays
@@ -251,10 +252,10 @@ var void_ptr = TypeName.VOID.pointer_to ();
 var matrix_type = new ArrayTypeName.of (TypeName.INT, 2); // int[,]
 
 var process_data = MethodSpec.method_builder ("process_data")
-    .add_modifiers (ValaModifier.PUBLIC)
+    .visibility (Visibility.PUBLIC)
     .add_parameter (ParameterSpec.builder (TypeName.INT, "input").build ())
     .add_parameter (ParameterSpec.builder (TypeName.INT, "output")
-        .direction (ParameterSpec.Direction.OUT)
+        .direction (ParameterDirection.OUT)
         .build ())
     .add_parameter (ParameterSpec.builder (void_ptr, "raw_buffer").build ())
     .add_parameter (ParameterSpec.builder (matrix_type, "matrix").build ())
@@ -283,7 +284,7 @@ var vala_file = ValaFile.builder ()
     .add_type (my_class)
     .build ();
 
-// Emission automatically includes: using Gee; using GLib; etc.
+// Emission automatically includes: using GLib; etc.
 ```
 
 ---

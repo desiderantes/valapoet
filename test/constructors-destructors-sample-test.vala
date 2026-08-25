@@ -27,13 +27,14 @@ public class ConstructorsDestructorsSampleTest : Object {
 
         Test.add_func ("/valapoet/constructors_destructors_sample", () => {
             var expected = """public class Widget : GLib.Object {
+	public string name;
 	static construct {
 		stdout.printf ("Static initialized\n");
 	}
 	construct {
 		stdout.printf ("Object constructed\n");
 	}
-	public string name;
+
 	public Widget () {
 		this.name = "default";
 	}
