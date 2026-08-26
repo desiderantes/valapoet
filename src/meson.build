@@ -40,6 +40,8 @@ libvalapoet = library(
     dependencies: dependencies,
     vala_args: [
         '--abi-stability',
+        '--enable-experimental',
+        '--hide-internal',
     ],
     install: true,
 )
