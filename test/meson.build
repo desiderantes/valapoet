@@ -1,4 +1,21 @@
 test_sources = [
+    # 1:1 Spec & Core Unit Tests
+    'attribute-spec-test',
+    'valadoc-spec-test',
+    'code-block-test',
+    'type-name-test',
+    'type-spec-test',
+    'enum-spec-test',
+    'error-domain-spec-test',
+    'method-spec-test',
+    'field-spec-test',
+    'property-spec-test',
+    'parameter-spec-test',
+    'signal-spec-test',
+    'vala-file-test',
+    'name-allocator-test',
+
+    # E2E & Feature Integration Sample Tests
     'hello-world-test',
     'string-sample-test',
     'gee-list-sample-test',
@@ -8,7 +25,6 @@ test_sources = [
     'error-domain-sample-test',
     'generics-sample-test',
     'contract-sample-test',
-    'name-allocator-test',
     'property-sample-test',
     'async-method-sample-test',
     'delegate-sample-test',
@@ -17,7 +33,6 @@ test_sources = [
     'struct-interface-sample-test',
     'parameter-directions-pointers-test',
     'dbus-sample-test',
-    'methods-syntax-support-test',
     'readme-sample-test',
 ]
 

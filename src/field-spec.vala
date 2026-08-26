@@ -76,6 +76,11 @@ namespace ValaPoet {
                 return this;
             }
 
+            public Builder add_attribute (AttributeSpec attribute) {
+                this.attributes.append (attribute);
+                return this;
+            }
+
             public Builder initializer (string format, ...) {
                 var va = va_list ();
                 this.initializer_block = CodeBlock.of_valist (format, va);
