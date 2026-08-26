@@ -117,6 +117,7 @@ namespace ValaPoet {
         }
 
         public void emit_type_spec (TypeSpec type_spec) {
+            emit_comment (type_spec.comment);
             emit_valadoc (type_spec.valadoc);
             emit_attributes (type_spec.attributes);
             emit_visibility (type_spec.visibility);
@@ -208,8 +209,11 @@ namespace ValaPoet {
                 uint enc_len = type_spec.enum_constants.length ();
                 uint i = 0;
                 foreach (var c in type_spec.enum_constants) {
+                    if (c.comment != null) {
+                        emit_comment (c.comment);
+                    }
                     if (c.valadoc != null) {
-                        emit_code_block (c.valadoc);
+                        emit_valadoc (c.valadoc);
                     }
                     emit ("%s", c.name);
                     if (c.value != null) {
@@ -218,7 +222,7 @@ namespace ValaPoet {
                     if (i < enc_len - 1) {
                         emit (",\n");
                     } else if (has_members) {
-                        emit (";\n\n");
+                        emit (";\n");
                     } else {
                         emit ("\n");
                     }
@@ -260,7 +264,8 @@ namespace ValaPoet {
                 emit ("}\n");
             }
 
-            bool emitted_previous = (type_spec.fields != null && type_spec.fields.length () > 0) ||
+            bool emitted_previous = (type_spec.enum_constants != null && type_spec.enum_constants.length () > 0) ||
+                                    (type_spec.fields != null && type_spec.fields.length () > 0) ||
                                     (type_spec.properties != null && type_spec.properties.length () > 0) ||
                                     (type_spec.signals != null && type_spec.signals.length () > 0) ||
                                     type_spec.static_construct_block != null ||
@@ -339,6 +344,8 @@ namespace ValaPoet {
         }
 
         public void emit_property (PropertySpec prop_spec) {
+            emit_comment (prop_spec.comment);
+            emit_valadoc (prop_spec.valadoc);
             emit_attributes (prop_spec.attributes);
             emit_visibility (prop_spec.visibility);
             emit_symbol_modifiers (prop_spec.modifiers);
@@ -415,6 +422,7 @@ namespace ValaPoet {
         }
 
         public void emit_method (MethodSpec method_spec, string enclosing_name = "") {
+            emit_comment (method_spec.comment);
             emit_valadoc (method_spec.valadoc);
             emit_attributes (method_spec.attributes);
             emit_visibility (method_spec.visibility);
@@ -520,6 +528,8 @@ namespace ValaPoet {
         }
 
         public void emit_signal (SignalSpec signal_spec) {
+            emit_comment (signal_spec.comment);
+            emit_valadoc (signal_spec.valadoc);
             emit_attributes (signal_spec.attributes);
             emit_visibility (signal_spec.visibility);
             emit_symbol_modifiers (signal_spec.modifiers);
@@ -543,6 +553,8 @@ namespace ValaPoet {
         }
 
         public void emit_field (FieldSpec field_spec) {
+            emit_comment (field_spec.comment);
+            emit_valadoc (field_spec.valadoc);
             emit_attributes (field_spec.attributes);
             emit_visibility (field_spec.visibility);
             emit_symbol_modifiers (field_spec.modifiers);
@@ -552,6 +564,16 @@ namespace ValaPoet {
                 emit_code_block (field_spec.initializer);
             }
             emit (";\n");
+        }
+
+        public void emit_comment (string? comment) {
+            if (comment == null || comment.strip () == "") return;
+            var comment_lines = comment.split ("\n");
+            foreach (var line in comment_lines) {
+                if (line != "") {
+                    emit ("// %s\n", line);
+                }
+            }
         }
 
         public void emit_valadoc (CodeBlock? valadoc) {

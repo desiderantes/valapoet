@@ -26,11 +26,15 @@ namespace ValaPoet {
         public Visibility visibility { get; private set; }
         public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+        public string? comment { get; private set; }
+        public CodeBlock? valadoc { get; private set; }
 
         private SignalSpec (Builder builder) {
             this.name = builder.name;
             this.return_type = builder.return_type;
             this.visibility = builder.vis;
+            this.comment = builder.comment;
+            this.valadoc = builder.valadoc.build ();
             this.parameters = new GLib.List<ParameterSpec>();
             foreach (var p in builder.parameters) {
                 this.parameters.append (p);
@@ -56,6 +60,8 @@ namespace ValaPoet {
             public Visibility vis { get; private set; }
             public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+            public string? comment { get; private set; }
+            public CodeBlock.Builder valadoc { get; private set; }
 
             public Builder (string name) {
                 this.name = name;
@@ -63,6 +69,24 @@ namespace ValaPoet {
                 this.parameters = new GLib.List<ParameterSpec>();
                 this.modifiers = new GLib.List<SymbolModifier>();
                 this.attributes = new GLib.List<AttributeSpec>();
+                this.valadoc = new CodeBlock.Builder ();
+            }
+
+            public Builder add_comment (string format, ...) {
+                var va = va_list ();
+                string formatted = format.vprintf (va);
+                if (this.comment == null) {
+                    this.comment = formatted;
+                } else {
+                    this.comment += "\n" + formatted;
+                }
+                return this;
+            }
+
+            public Builder add_valadoc (string format, ...) {
+                var va = va_list ();
+                this.valadoc.add_valist (format, va);
+                return this;
             }
 
             public Builder returns (TypeName return_type) {

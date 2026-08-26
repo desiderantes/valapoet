@@ -38,10 +38,15 @@ namespace ValaPoet {
         public bool is_read_only { get; private set; }
         public bool is_construct_only { get; private set; }
 
+        public string? comment { get; private set; }
+        public CodeBlock ? valadoc { get; private set; }
+
         private PropertySpec (Builder builder) {
             this.name = builder.name;
             this.type_name = builder.type_name;
             this.visibility = builder.vis;
+            this.comment = builder.comment;
+            this.valadoc = builder.valadoc.build ();
             this.attributes = new GLib.List<AttributeSpec>();
             foreach (var a in builder.attributes) {
                 this.attributes.append (a);
@@ -78,6 +83,8 @@ namespace ValaPoet {
             public string name { get; private set; }
             public TypeName type_name { get; private set; }
             public Visibility vis { get; private set; }
+            public string? comment { get; private set; }
+            public CodeBlock.Builder valadoc { get; private set; }
             public unowned GLib.List<AttributeSpec> attributes { get; private set; }
             public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public CodeBlock? get_body_block { get; private set; }
@@ -99,10 +106,28 @@ namespace ValaPoet {
                 this.vis = Visibility.NONE;
                 this.get_vis = Visibility.NONE;
                 this.set_vis = Visibility.NONE;
+                this.valadoc = new CodeBlock.Builder ();
                 this.attributes = new GLib.List<AttributeSpec>();
                 this.modifiers = new GLib.List<SymbolModifier>();
                 this.get_modifiers = new GLib.List<SymbolModifier>();
                 this.set_modifiers = new GLib.List<SymbolModifier>();
+            }
+
+            public Builder add_comment (string format, ...) {
+                var va = va_list ();
+                string formatted = format.vprintf (va);
+                if (this.comment == null) {
+                    this.comment = formatted;
+                } else {
+                    this.comment += "\n" + formatted;
+                }
+                return this;
+            }
+
+            public Builder add_valadoc (string format, ...) {
+                var va = va_list ();
+                this.valadoc.add_valist (format, va);
+                return this;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {

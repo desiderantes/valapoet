@@ -25,6 +25,8 @@ namespace ValaPoet {
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public Visibility visibility { get; private set; }
         public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+        public string? comment { get; private set; }
+        public CodeBlock ? valadoc { get; private set; }
         public CodeBlock ? initializer { get; private set; }
 
         private FieldSpec (Builder builder) {
@@ -39,6 +41,8 @@ namespace ValaPoet {
             foreach (var m in builder.modifiers) {
                 this.modifiers.append (m);
             }
+            this.comment = builder.comment;
+            this.valadoc = builder.valadoc.build ();
             this.initializer = builder.initializer_block;
         }
 
@@ -52,6 +56,8 @@ namespace ValaPoet {
             public Visibility vis { get; private set; }
             public unowned GLib.List<AttributeSpec> attributes { get; private set; }
             public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
+            public string? comment { get; private set; }
+            public CodeBlock.Builder valadoc { get; private set; }
             public CodeBlock ? initializer_block { get; private set; }
 
             public Builder (TypeName type_name, string name) {
@@ -60,6 +66,24 @@ namespace ValaPoet {
                 this.vis = Visibility.NONE;
                 this.attributes = new GLib.List<AttributeSpec>();
                 this.modifiers = new GLib.List<SymbolModifier>();
+                this.valadoc = new CodeBlock.Builder ();
+            }
+
+            public Builder add_comment (string format, ...) {
+                var va = va_list ();
+                string formatted = format.vprintf (va);
+                if (this.comment == null) {
+                    this.comment = formatted;
+                } else {
+                    this.comment += "\n" + formatted;
+                }
+                return this;
+            }
+
+            public Builder add_valadoc (string format, ...) {
+                var va = va_list ();
+                this.valadoc.add_valist (format, va);
+                return this;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {

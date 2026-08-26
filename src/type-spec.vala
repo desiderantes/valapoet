@@ -18,21 +18,6 @@
 
 namespace ValaPoet {
 
-
-
-    public class EnumConstantSpec : GLib.Object {
-        public string name { get; private set; }
-        public int? value { get; private set; }
-        public CodeBlock? valadoc { get; private set; }
-
-        public EnumConstantSpec (string name, int? value = null, CodeBlock? valadoc = null) {
-            this.name = name;
-            this.value = value;
-            this.valadoc = valadoc;
-        }
-
-    }
-
     public class TypeSpec : GLib.Object {
 
         public enum Kind {
@@ -47,6 +32,7 @@ namespace ValaPoet {
         public Kind kind { get; private set; }
         public string name { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+        public string? comment { get; private set; }
         public CodeBlock? valadoc { get; private set; }
         public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
         public TypeName? superclass { get; private set; }
@@ -76,6 +62,7 @@ namespace ValaPoet {
             foreach (var m in builder.modifiers) {
                 this.modifiers.append (m);
             }
+            this.comment = builder.comment;
             this.valadoc = builder.valadoc.build ();
             this.type_variables = new GLib.List<TypeVariableName>();
             foreach (var tv in builder.type_variables) {
@@ -149,6 +136,7 @@ namespace ValaPoet {
             public Visibility vis { get; private set; }
             public unowned GLib.List<SymbolModifier> modifiers { get; private set; }
             public unowned GLib.List<AttributeSpec> attributes { get; private set; }
+            public string? comment { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
             public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
             public TypeName? super_class { get; private set; }
@@ -180,6 +168,21 @@ namespace ValaPoet {
                 this.nested_types = new GLib.List<TypeSpec>();
                 this.error_codes = new GLib.List<string>();
                 this.enum_constants = new GLib.List<EnumConstantSpec>();
+            }
+
+            public Builder add_comment (string format, ...) {
+                var va = va_list ();
+                return add_comment_valist (format, va);
+            }
+
+            public Builder add_comment_valist (string format, va_list va) {
+                string formatted = format.vprintf (va);
+                if (this.comment == null) {
+                    this.comment = formatted;
+                } else {
+                    this.comment += "\n" + formatted;
+                }
+                return this;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {
@@ -324,115 +327,6 @@ namespace ValaPoet {
                 return new TypeSpec (this);
             }
 
-        }
-    }
-
-    public class EnumSpec : GLib.Object {
-
-        public static Builder builder (string name) {
-            return new Builder (name);
-        }
-
-        public class Builder : GLib.Object {
-            private TypeSpec.Builder inner_builder;
-
-            public Builder (string name) {
-                this.inner_builder = new TypeSpec.Builder (TypeSpec.Kind.ENUM, name);
-            }
-
-            public Builder visibility (Visibility vis) {
-                inner_builder.visibility (vis);
-                return this;
-            }
-
-            public Builder add_modifiers (params SymbolModifier[] modifiers) {
-                foreach (var m in modifiers) {
-                    inner_builder.add_modifiers (m);
-                }
-                return this;
-            }
-
-            public Builder add_attribute (AttributeSpec attribute) {
-                inner_builder.add_attribute (attribute);
-                return this;
-            }
-
-            public Builder add_valadoc (string format, ...) {
-                var va = va_list ();
-                inner_builder.add_valadoc_valist (format, va);
-                return this;
-            }
-
-            public Builder add_valadoc_spec (ValadocSpec doc) {
-                inner_builder.add_valadoc_spec (doc);
-                return this;
-            }
-
-            public Builder add_constant (string name, int? value = null) {
-                inner_builder.add_enum_constant (name, value);
-                return this;
-            }
-
-            public Builder add_method (MethodSpec method) {
-                inner_builder.add_method (method);
-                return this;
-            }
-
-            public TypeSpec build () {
-                return inner_builder.build ();
-            }
-        }
-    }
-
-    public class ErrorDomainSpec : GLib.Object {
-
-        public static Builder builder (string name) {
-            return new Builder (name);
-        }
-
-        public class Builder : GLib.Object {
-            private TypeSpec.Builder inner_builder;
-
-            public Builder (string name) {
-                this.inner_builder = new TypeSpec.Builder (TypeSpec.Kind.ERROR_DOMAIN, name);
-            }
-
-            public Builder visibility (Visibility vis) {
-                inner_builder.visibility (vis);
-                return this;
-            }
-
-            public Builder add_modifiers (params SymbolModifier[] modifiers) {
-                foreach (var m in modifiers) {
-                    inner_builder.add_modifiers (m);
-                }
-                return this;
-            }
-
-            public Builder add_attribute (AttributeSpec attribute) {
-                inner_builder.add_attribute (attribute);
-                return this;
-            }
-
-            public Builder add_valadoc (string format, ...) {
-                var va = va_list ();
-                inner_builder.add_valadoc_valist (format, va);
-                return this;
-            }
-
-            public Builder add_valadoc_spec (ValadocSpec doc) {
-                inner_builder.add_valadoc_spec (doc);
-                return this;
-            }
-
-            public Builder add_error_code (string name) {
-                inner_builder.add_error_code (name);
-                return this;
-            }
-
-            public TypeSpec build () {
-                return inner_builder.build ();
-            }
         }
     }
 

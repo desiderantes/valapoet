@@ -80,6 +80,29 @@ public class TypeSpecTest : Object {
             assert_true (CodeCompiler.verify_code_compiles (code));
         });
 
+        Test.add_func ("/valapoet/type_spec/symbol_comments", () => {
+            var field = FieldSpec.builder (TypeName.INT, "counter")
+            .add_comment ("Regular non-docstring field comment")
+            .visibility (Visibility.PRIVATE)
+            .build ();
+
+            var test_class = TypeSpec.class_builder ("CommentWidget")
+            .add_comment ("Regular non-docstring class comment")
+            .visibility (Visibility.PUBLIC)
+            .superclass (TypeName.OBJECT)
+            .add_field (field)
+            .build ();
+
+            var vala_file = ValaFile.builder ()
+            .add_type (test_class)
+            .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("// Regular non-docstring class comment\n"));
+            assert_true (code.contains ("// Regular non-docstring field comment\n"));
+            assert_true (CodeCompiler.verify_code_compiles (code));
+        });
+
         return Test.run ();
     }
 

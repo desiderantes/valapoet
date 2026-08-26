@@ -29,7 +29,8 @@ namespace ValaPoet {
 
         public Kind kind { get; private set; }
         public string name { get; private set; }
-        public CodeBlock valadoc { get; private set; }
+        public string? comment { get; private set; }
+        public CodeBlock? valadoc { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public unowned GLib.List<TypeVariableName> type_variables { get; private set; }
         public TypeName ? return_type { get; private set; }
@@ -47,6 +48,7 @@ namespace ValaPoet {
             this.kind = builder.kind;
             this.name = builder.name;
             this.visibility = builder.vis;
+            this.comment = builder.comment;
             this.valadoc = builder.valadoc.build ();
             this.attributes = new GLib.List<AttributeSpec>();
             foreach (var a in builder.attributes) {
@@ -101,6 +103,7 @@ namespace ValaPoet {
         public class Builder : GLib.Object {
             public Kind kind { get; private set; }
             public string name { get; private set; }
+            public string? comment { get; private set; }
             public CodeBlock.Builder valadoc { get; private set; }
             public unowned GLib.List<AttributeSpec> attributes { get; private set; }
             public Visibility vis { get; private set; }
@@ -129,6 +132,17 @@ namespace ValaPoet {
                 this.code = new CodeBlock.Builder ();
                 this.throws_errs = new GLib.List<TypeName>();
                 this.is_variadic = false;
+            }
+
+            public Builder add_comment (string format, ...) {
+                var va = va_list ();
+                string formatted = format.vprintf (va);
+                if (this.comment == null) {
+                    this.comment = formatted;
+                } else {
+                    this.comment += "\n" + formatted;
+                }
+                return this;
             }
 
             public Builder add_modifiers (params SymbolModifier[] modifiers) {

@@ -26,6 +26,7 @@ sources = files(
     'vala-writer.vala',
     'field-spec.vala',
     'type-spec.vala',
+    'enum-spec.vala',
     'signal-spec.vala',
     'modifier.vala',
     'valadoc-spec.vala',
