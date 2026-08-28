@@ -2,7 +2,22 @@
 
 `ValaPoet` is a Vala library for generating `.vala` source files, inspired by [JavaPoet](https://github.com/square/javapoet).
 
-It provides fluent builder APIs to generate robust, idiomatic Vala code programmatically—complete with automatic `using` directive resolution, memory ownership annotations (`owned`, `unowned`, `weak`), GObject properties and signals, async methods, contract programming (`requires`/`ensures`), error domains, delegates, and keyword-safe identifier allocation.
+It provides fluent builder APIs to generate robust, idiomatic Vala code programmatically—complete with automatic `using` directive resolution, memory ownership annotations (`owned`, `unowned`, `weak`), GObject properties and signals, async methods, contract programming (`requires`/`ensures`), enums with methods, error domains, delegates, non-docstring single-line comments (`//`), ValaDoc docstrings, and keyword-safe identifier allocation.
+
+---
+
+## Dependencies
+
+### Library (`libvalapoet`)
+`ValaPoet` has zero third-party library dependencies and relies exclusively on standard GLib core libraries:
+* **GLib** (`>= 2.80`)
+* **GObject** (`>= 2.80`)
+* **Gio** (`>= 2.80`)
+
+### Test Suite (`test/`)
+Running the test suite (`meson test`) requires:
+* **Vala Compiler** (`>= 0.56`)
+* **Libgee** (`gee-0.8`) *(test suite only)*
 
 ---
 
@@ -12,6 +27,7 @@ Here is how you generate a standard Vala `HelloWorld` program:
 
 ```vala
 var main_method = MethodSpec.method_builder ("main")
+    .add_comment ("Entry point of the application")
     .visibility (Visibility.PUBLIC)
     .add_modifiers (SymbolModifier.STATIC)
     .returns (TypeName.INT)
@@ -21,6 +37,7 @@ var main_method = MethodSpec.method_builder ("main")
     .build ();
 
 var hello_world_class = TypeSpec.class_builder ("HelloWorld")
+    .add_comment ("Main application class")
     .visibility (Visibility.PUBLIC)
     .superclass (TypeName.OBJECT)
     .add_method (main_method)
@@ -41,7 +58,9 @@ print ("%s", vala_file.to_string ());
 ```vala
 namespace Example {
 
+	// Main application class
 	public class HelloWorld : GLib.Object {
+		// Entry point of the application
 		public static int main (string[] args) {
 			stdout.printf ("Hello, ValaPoet!\n");
 			return 0;
@@ -54,7 +73,7 @@ namespace Example {
 
 ## Code & Control Flow
 
-Method bodies are built using fluent control-flow methods on `MethodSpec.Builder`:
+Method bodies are built using fluent control-flow methods on `MethodSpec.Builder` or `CodeBlock.Builder`:
 
 ```vala
 var main_method = MethodSpec.method_builder ("main")
@@ -104,7 +123,67 @@ var code = CodeBlock.builder ()
 
 ## Vala Language Features
 
-### 1. Memory Ownership & Nullability
+### 1. Enums with Constants, Custom Values & Methods
+Define enums, customize integer values, add single-line comments, and attach instance or static methods:
+
+```vala
+var status_enum = EnumSpec.builder ("Status")
+    .visibility (Visibility.PUBLIC)
+    .add_comment ("System operational status")
+    .add_constant ("IDLE", 0)
+    .add_constant ("RUNNING", 1)
+    .add_constant ("FINISHED", 2)
+    .add_method (
+        MethodSpec.method_builder ("to_display_string")
+            .visibility (Visibility.PUBLIC)
+            .returns (TypeName.STRING)
+            .begin_switch ("this")
+                .add_statement ("case IDLE: return \"Idle\"")
+                .add_statement ("case RUNNING: return \"Running\"")
+                .add_statement ("case FINISHED: return \"Finished\"")
+                .add_statement ("default: return \"Unknown\"")
+            .end_control_flow ()
+            .build ()
+    )
+    .build ();
+```
+
+**Generates:**
+
+```vala
+// System operational status
+public enum Status {
+	IDLE = 0,
+	RUNNING = 1,
+	FINISHED = 2;
+
+	public string to_display_string () {
+		switch (this) {
+			case IDLE: return "Idle";
+			case RUNNING: return "Running";
+			case FINISHED: return "Finished";
+			default: return "Unknown";
+		}
+	}
+}
+```
+
+---
+
+### 2. Symbol Comments (`//`) vs ValaDoc Docstrings (`/** ... */`)
+ValaPoet clearly separates single-line code comments (`// ...`) from ValaDoc documentation (`/** ... */`):
+
+```vala
+var field = FieldSpec.builder (TypeName.INT, "counter")
+    .add_comment ("Internal state counter") // Emits: // Internal state counter
+    .add_valadoc ("Value representing item count.") // Emits: /** * Value representing item count. */
+    .visibility (Visibility.PRIVATE)
+    .build ();
+```
+
+---
+
+### 3. Memory Ownership & Nullability
 Types support chainable ownership and reference modifiers:
 
 ```vala
@@ -130,7 +209,9 @@ var set_data = MethodSpec.method_builder ("set_data")
     .build ();
 ```
 
-### 2. GObject Properties
+---
+
+### 4. GObject Properties
 Generate auto-properties or properties with custom accessors and default values:
 
 ```vala
@@ -153,7 +234,9 @@ var name_prop = PropertySpec.builder (TypeName.STRING, "name")
     .build ();
 ```
 
-### 3. GObject Signals
+---
+
+### 5. GObject Signals
 Declare signals with parameter signatures and code attributes:
 
 ```vala
@@ -164,7 +247,9 @@ var activated_signal = SignalSpec.builder ("activated")
     .build ();
 ```
 
-### 4. Constructors, Named Constructors & Destructors
+---
+
+### 6. Constructors, Named Constructors & Destructors
 Support for static construct blocks, GObject construct blocks, named constructors, and destructors:
 
 ```vala
@@ -191,7 +276,9 @@ var widget_class = TypeSpec.class_builder ("Widget")
     .build ();
 ```
 
-### 5. Contract Programming (`requires` / `ensures`)
+---
+
+### 7. Contract Programming (`requires` / `ensures`)
 Add preconditions and postconditions directly to method builders:
 
 ```vala
@@ -206,11 +293,13 @@ var safe_divide = MethodSpec.method_builder ("safe_divide")
     .build ();
 ```
 
-### 6. Error Domains & Exception Handling (`throws`)
+---
+
+### 8. Error Domains & Exception Handling (`throws`)
 Define error domains and attach exception specifications to methods:
 
 ```vala
-var file_error_domain = TypeSpec.error_domain_builder ("FileError")
+var file_error_domain = ErrorDomainSpec.builder ("FileError")
     .visibility (Visibility.PUBLIC)
     .add_error_code ("NOT_FOUND")
     .add_error_code ("PERMISSION_DENIED")
@@ -223,7 +312,9 @@ var read_file = MethodSpec.method_builder ("read_file")
     .build ();
 ```
 
-### 7. Generics & Parameterized Types
+---
+
+### 9. Generics & Parameterized Types
 Declare type variables and generic type bounds:
 
 ```vala
@@ -236,7 +327,9 @@ var container_class = TypeSpec.class_builder ("Container")
     .build ();
 ```
 
-### 8. Delegates
+---
+
+### 10. Delegates
 Define Vala callback delegates with custom parameter signatures and CCode attributes:
 
 ```vala
@@ -245,7 +338,9 @@ var callback_delegate = DelegateName.get ("Callback", TypeName.VOID)
     .add_attribute (AttributeSpec.builder ("CCode").add_argument ("has_target", "false").build ());
 ```
 
-### 9. Parameter Directions (`out`, `ref`), Pointers & Multi-Dimensional Arrays
+---
+
+### 11. Parameter Directions (`out`, `ref`), Pointers & Multi-Dimensional Arrays
 
 ```vala
 var void_ptr = TypeName.VOID.pointer_to ();
@@ -263,7 +358,9 @@ var process_data = MethodSpec.method_builder ("process_data")
     .build ();
 ```
 
-### 10. Keyword Safety & `NameAllocator`
+---
+
+### 12. Keyword Safety & `NameAllocator`
 `NameAllocator` guarantees valid Vala identifiers and automatically escapes Vala keywords using the `@` prefix (`@class`, `@signal`, `@weak`) or `_` prefix for literals/primitives (`_int`, `_true`):
 
 ```vala
@@ -275,7 +372,7 @@ string kw_int = allocator.new_name ("int");    // -> "_int"
 
 ---
 
-## Automatic Imports Resolution
+## Automatic Import & Namespace Resolution
 
 `ValaWriter` automatically inspects all used `TypeName` references across types, methods, fields, and parameters, dynamically emitting sorted `using` directives at the top of the generated `.vala` file.
 
@@ -284,25 +381,38 @@ var vala_file = ValaFile.builder ()
     .add_type (my_class)
     .build ();
 
-// Emission automatically includes: using GLib; etc.
+// Emission automatically resolves and emits: using GLib; etc.
 ```
 
 ---
 
-### Build Library & Run Test Suite:
+## Custom Indentation Configuration
+
+By default, `ValaWriter` formats output using tab indentation (`\t`). Custom space indentation (e.g. 2 spaces, 4 spaces) can be configured via `ValaFile.Builder`:
+
+```vala
+var vala_file = ValaFile.builder ()
+    .indent ("  ") // Configures 2-space indentation
+    .add_type (my_class)
+    .build ();
+```
+
+---
+
+## Build Library & Run Test Suite
 
 ```bash
 meson setup build
 meson test -C build --verbose
 ```
 
-The test suite includes 20 (still barebones) unit tests verifying both output code format and AST compilation via `libvala`.
+The test suite includes 34 (still barebones) unit tests verifying both output code format and AST compilation via `libvala`.
 
 ---
 
 ## License
 
-Copyright 2026 ValaPoet Authors
+Copyright 2026 ValaPoet Authors (check the AUTHORS file for details).
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -315,4 +425,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

@@ -14,6 +14,7 @@ test_sources = [
     'signal-spec-test',
     'vala-file-test',
     'indentation-test',
+    'import-resolution-test',
     'name-allocator-test',
 
     # E2E & Feature Integration Sample Tests

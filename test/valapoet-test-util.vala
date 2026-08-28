@@ -63,6 +63,57 @@ namespace ValaPoetTestUtil {
             }
         }
 
+        public static bool verify_multiple_files_compile (string[] code_contents, string[] extra_packages = {}) {
+            string[] tmp_files = {};
+            string[] c_files = {};
+            try {
+                string[] argv = {
+                    "valac",
+                    "-C",
+                    "--pkg", "gee-0.8",
+                    "--pkg", "gio-2.0",
+                    "--pkg", "gobject-2.0",
+                    "--pkg", "glib-2.0"
+                };
+
+                foreach (var pkg in extra_packages) {
+                    argv += "--pkg";
+                    argv += pkg;
+                }
+
+                uint id = Random.next_int ();
+                for (int i = 0; i < code_contents.length; i++) {
+                    string tmp_file = "tmp_compile_test_%u_%d.vala".printf (id, i);
+                    FileUtils.set_contents (tmp_file, code_contents[i]);
+                    tmp_files += tmp_file;
+                    c_files += tmp_file.replace (".vala", ".c");
+                    argv += tmp_file;
+                }
+
+                int exit_status;
+                string standard_output;
+                string standard_error;
+
+                Process.spawn_sync (null, argv, null, SpawnFlags.SEARCH_PATH, null, out standard_output, out standard_error, out exit_status);
+
+                foreach (var f in tmp_files) {
+                    FileUtils.unlink (f);
+                }
+                foreach (var f in c_files) {
+                    FileUtils.unlink (f);
+                }
+
+                if (exit_status != 0) {
+                    stderr.printf ("\n=== MULTI-FILE COMPILER VERIFICATION FAILED ===\n--- STDERR ---\n%s\n", standard_error);
+                }
+
+                return exit_status == 0;
+            } catch (Error e) {
+                stderr.printf ("Spawn error: %s\n", e.message);
+                return false;
+            }
+        }
+
     }
 
 }
