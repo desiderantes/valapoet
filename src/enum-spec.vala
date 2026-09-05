@@ -18,8 +18,8 @@
 
 namespace ValaPoet {
 
-    public class EnumConstantSpec : GLib.Object {
-        public string name { get; private set; }
+    public class EnumConstantSpec : Nameable, GLib.Object {
+        public string name { get; protected set; }
         public int? value { get; private set; }
         public string? comment { get; private set; }
         public CodeBlock? valadoc { get; private set; }

@@ -76,20 +76,9 @@ namespace ValaPoet {
             this.since_version = builder.since_text;
             this.deprecated_reason = builder.deprecated_text;
 
-            this._params_docs = new GLib.List<ParamDoc>();
-            foreach (var p in builder.params_docs) {
-                this._params_docs.append (p);
-            }
-
-            this._throws_docs = new GLib.List<ThrowsDoc>();
-            foreach (var t in builder.throws_docs) {
-                this._throws_docs.append (t);
-            }
-
-            this._see_also = new GLib.List<string>();
-            foreach (var s in builder.see_also) {
-                this._see_also.append (s);
-            }
+            this._params_docs = builder.params_docs.copy_deep ((CopyFunc) Object.ref);
+            this._throws_docs = builder.throws_docs.copy_deep ((CopyFunc) Object.ref);
+            this._see_also = builder.see_also.copy_deep ((CopyFunc) strdup);
         }
 
         public CodeBlock to_code_block () {

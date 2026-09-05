@@ -9,6 +9,7 @@ conf.set('MICRO_VERSION', MICRO_VERSION)
 conf.set('API_VERSION', API_VERSION)
 
 sources = files(
+    'typestuff/nameable.vala',
     'type-name.vala',
     'pointer-type-name.vala',
     'array-type-name.vala',

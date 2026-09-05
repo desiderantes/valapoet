@@ -18,9 +18,9 @@
 
 namespace ValaPoet {
 
-    public class DelegateName : TypeName {
+    public class DelegateName : TypeName, Nameable {
 
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public TypeName return_type { get; private set; }
         public unowned GLib.List<ParameterSpec> parameters { get; private set; }
         public Visibility visibility { get; private set; }

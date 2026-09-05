@@ -18,9 +18,9 @@
 
 namespace ValaPoet {
 
-    public class AttributeSpec : GLib.Object {
+    public class AttributeSpec : Nameable, GLib.Object {
 
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public GLib.HashTable<string, CodeBlock> arguments { get; private set; }
 
         private AttributeSpec (Builder builder) {

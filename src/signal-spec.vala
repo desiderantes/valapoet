@@ -18,9 +18,9 @@
 
 namespace ValaPoet {
 
-    public class SignalSpec : GLib.Object {
+    public class SignalSpec : Nameable, GLib.Object {
 
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public TypeName? return_type { get; private set; }
         public unowned GLib.List<ParameterSpec> parameters { get; private set; }
         public Visibility visibility { get; private set; }

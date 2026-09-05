@@ -18,9 +18,9 @@
 
 namespace ValaPoet {
 
-    public class PropertySpec : GLib.Object {
+    public class PropertySpec : Nameable, GLib.Object {
 
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public TypeName type_name { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public Visibility visibility { get; private set; }

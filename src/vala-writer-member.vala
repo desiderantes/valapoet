@@ -307,13 +307,11 @@ namespace ValaPoet {
                                     if (part == "$T" && obj is TypeName) {
                                         sb.append (lookup_name ((TypeName) obj));
                                     } else if (part == "$N") {
-                                        if (obj is MethodSpec) sb.append (((MethodSpec) obj).name);
-                                        else if (obj is FieldSpec) sb.append (((FieldSpec) obj).name);
-                                        else if (obj is PropertySpec) sb.append (((PropertySpec) obj).name);
-                                        else if (obj is ParameterSpec) sb.append (((ParameterSpec) obj).name);
-                                        else if (obj is TypeSpec) sb.append (((TypeSpec) obj).name);
-                                        else if (obj is SignalSpec) sb.append (((SignalSpec) obj).name);
-                                        else sb.append (obj.get_type ().name ());
+                                        if (obj is Nameable) {
+                                            sb.append (((Nameable) obj).name);
+                                        } else {
+                                            sb.append (obj.get_type ().name ());
+                                        }
                                     } else if (obj is CodeBlock) {
                                         sb.append (render_code_block_to_string ((CodeBlock) obj));
                                     } else if (obj is TypeName) {
@@ -423,13 +421,11 @@ namespace ValaPoet {
                                     if (part == "$T" && obj is TypeName) {
                                         emit (lookup_name ((TypeName) obj));
                                     } else if (part == "$N") {
-                                        if (obj is MethodSpec)emit (((MethodSpec) obj).name);
-                                            else if (obj is FieldSpec)emit (((FieldSpec) obj).name);
-                                            else if (obj is PropertySpec)emit (((PropertySpec) obj).name);
-                                            else if (obj is ParameterSpec)emit (((ParameterSpec) obj).name);
-                                            else if (obj is TypeSpec)emit (((TypeSpec) obj).name);
-                                            else if (obj is SignalSpec)emit (((SignalSpec) obj).name);
-                                        else emit (obj.get_type ().name ());
+                                        if (obj is Nameable) {
+                                            emit (((Nameable) obj).name);
+                                        } else {
+                                            emit (obj.get_type ().name ());
+                                        }
                                     } else if (obj is CodeBlock) {
                                         emit_code_block ((CodeBlock) obj);
                                     } else if (obj is TypeName) {

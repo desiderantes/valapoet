@@ -18,7 +18,7 @@
 
 namespace ValaPoet {
 
-    public class ParameterSpec : GLib.Object {
+    public class ParameterSpec : Nameable, GLib.Object {
 
 
 
@@ -28,7 +28,7 @@ namespace ValaPoet {
             REF
         }
 
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public TypeName type_name { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public unowned GLib.List<SymbolModifier> modifiers { get; private set; }

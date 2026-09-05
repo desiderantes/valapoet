@@ -18,7 +18,7 @@
 
 namespace ValaPoet {
 
-    public class TypeSpec : GLib.Object {
+    public class TypeSpec : Nameable, GLib.Object {
 
         public enum Kind {
             CLASS,
@@ -30,7 +30,7 @@ namespace ValaPoet {
         }
 
         public Kind kind { get; private set; }
-        public string name { get; private set; }
+        public string name { get; protected set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }
         public string? comment { get; private set; }
         public CodeBlock? valadoc { get; private set; }

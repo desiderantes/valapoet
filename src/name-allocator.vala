@@ -96,17 +96,11 @@ namespace ValaPoet {
         }
 
         private static bool is_escapable_keyword (string name) {
-            foreach (var kw in ESCAPABLE_KEYWORDS) {
-                if (kw == name)return true;
-            }
-            return false;
+            return name in ESCAPABLE_KEYWORDS;
         }
 
         private static bool is_unescapable_keyword (string name) {
-            foreach (var kw in UNESCAPABLE_KEYWORDS) {
-                if (kw == name)return true;
-            }
-            return false;
+            return name in UNESCAPABLE_KEYWORDS;
         }
 
     }
