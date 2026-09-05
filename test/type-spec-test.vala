@@ -98,6 +98,48 @@ public class TypeSpecTest : Object {
             assert_true (CodeCompiler.verify_code_compiles (code));
         });
 
+        Test.add_func ("/valapoet/type_spec/abstract_class_validation", () => {
+            var abs_method = MethodSpec.method_builder ("draw")
+                .visibility (Visibility.PUBLIC)
+                .add_modifiers (SymbolModifier.ABSTRACT)
+                .build ();
+
+            var abs_class = TypeSpec.class_builder ("Shape")
+                .visibility (Visibility.PUBLIC)
+                .add_modifiers (SymbolModifier.ABSTRACT)
+                .superclass (TypeName.OBJECT)
+                .add_method (abs_method)
+                .build ();
+
+            var vala_file = ValaFile.builder ()
+                .add_type (abs_class)
+                .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("public abstract class Shape : GLib.Object {\n"));
+            assert_true (code.contains ("public abstract void draw ();\n"));
+            assert_true (CodeCompiler.verify_code_compiles (code));
+        });
+
+        Test.add_func ("/valapoet/type_spec/non_abstract_class_with_abstract_method_fails", () => {
+            Test.trap_subprocess ("/valapoet/type_spec/non_abstract_class_with_abstract_method_fails/subprocess", 0, 0);
+            Test.trap_assert_failed ();
+            Test.trap_assert_stderr ("*class with abstract methods must be abstract*");
+        });
+
+        Test.add_func ("/valapoet/type_spec/non_abstract_class_with_abstract_method_fails/subprocess", () => {
+            var abs_method = MethodSpec.method_builder ("draw")
+                .visibility (Visibility.PUBLIC)
+                .add_modifiers (SymbolModifier.ABSTRACT)
+                .build ();
+
+            TypeSpec.class_builder ("NonAbstractShape")
+                .visibility (Visibility.PUBLIC)
+                .superclass (TypeName.OBJECT)
+                .add_method (abs_method)
+                .build ();
+        });
+
         Test.add_func ("/valapoet/type_spec/symbol_comments", () => {
             var field = FieldSpec.builder (TypeName.INT, "counter")
             .add_comment ("Regular non-docstring field comment")
