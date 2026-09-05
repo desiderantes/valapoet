@@ -27,6 +27,8 @@ public class SignalSpecTest : Object {
         Test.add_func ("/valapoet/signal_spec/builder_and_parameters", () => {
             var signal = SignalSpec.builder ("clicked")
             .visibility (Visibility.PUBLIC)
+            .add_comment ("Signal comment %s %d", "sig", 1)
+            .add_valadoc ("Signal doc %s", "clicked")
             .returns (TypeName.BOOL)
             .add_parameter (ParameterSpec.builder (TypeName.INT, "x").build ())
             .add_parameter (ParameterSpec.builder (TypeName.INT, "y").build ())
@@ -43,6 +45,8 @@ public class SignalSpecTest : Object {
             .build ();
 
             string code = vala_file.to_string ();
+            assert_true (code.contains ("// Signal comment sig 1"));
+            assert_true (code.contains ("Signal doc clicked"));
             assert_true (code.contains ("public signal bool clicked (int x, int y);"));
             assert_true (CodeCompiler.verify_code_compiles (code));
         });

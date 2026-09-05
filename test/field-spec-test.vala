@@ -27,6 +27,8 @@ public class FieldSpecTest : Object {
         Test.add_func ("/valapoet/field_spec/builder_and_modifiers", () => {
             var field = FieldSpec.builder (TypeName.INT, "counter")
             .visibility (Visibility.PUBLIC)
+            .add_comment ("Field comment %s %d", "count", 1)
+            .add_valadoc ("Field doc %s", "counter")
             .add_modifiers (SymbolModifier.STATIC)
             .initializer ("42")
             .build ();
@@ -42,6 +44,8 @@ public class FieldSpecTest : Object {
             .build ();
 
             string code = vala_file.to_string ();
+            assert_true (code.contains ("// Field comment count 1"));
+            assert_true (code.contains ("Field doc counter"));
             assert_true (code.contains ("public static int counter = 42;"));
             assert_true (CodeCompiler.verify_code_compiles (code));
         });

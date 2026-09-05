@@ -27,6 +27,8 @@ public class PropertySpecTest : Object {
         Test.add_func ("/valapoet/property_spec/auto_property", () => {
             var prop = PropertySpec.builder (TypeName.STRING, "title")
             .visibility (Visibility.PUBLIC)
+            .add_comment ("Prop comment %s %d", "prop", 1)
+            .add_valadoc ("Prop doc %s", "title")
             .auto ()
             .build ();
 
@@ -41,6 +43,8 @@ public class PropertySpecTest : Object {
             .build ();
 
             string code = vala_file.to_string ();
+            assert_true (code.contains ("// Prop comment prop 1"));
+            assert_true (code.contains ("Prop doc title"));
             assert_true (code.contains ("public string title {\n\t\tget; set;\n\t}"));
             assert_true (CodeCompiler.verify_code_compiles (code));
         });

@@ -226,12 +226,12 @@ namespace ValaPoet {
 
             public Builder add_valadoc (string format, ...) {
                 var va = va_list ();
-                this.valadoc.add_valist (format, va);
-                return this;
+                return add_valadoc_valist (format, va);
             }
 
             public Builder add_valadoc_valist (string format, va_list va) {
-                this.valadoc.add_valist (format, va);
+                string formatted = format.vprintf (va);
+                this.valadoc.add_raw (formatted);
                 return this;
             }
 

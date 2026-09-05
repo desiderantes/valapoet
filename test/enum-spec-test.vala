@@ -27,6 +27,8 @@ public class EnumSpecTest : Object {
         Test.add_func ("/valapoet/enum_spec/constants_and_methods", () => {
             var enum_spec = EnumSpec.builder ("Status")
             .visibility (Visibility.PUBLIC)
+            .add_comment ("Enum comment %s %d", "status", 1)
+            .add_valadoc ("Enum doc %s", "Status")
             .add_constant ("IDLE")
             .add_constant ("RUNNING")
             .add_constant ("FINISHED")
@@ -50,6 +52,8 @@ public class EnumSpecTest : Object {
 
             string code = vala_file.to_string ();
             GLib.stdout.printf ("\n=== TEST 1: ENUM WITH METHOD ===\n%s\n", code);
+            assert_true (code.contains ("// Enum comment status 1"));
+            assert_true (code.contains ("Enum doc Status"));
             assert_true (code.contains ("public enum Status {\n"));
             assert_true (code.contains ("IDLE,\n"));
             assert_true (code.contains ("\tpublic string to_display_string () {\n"));

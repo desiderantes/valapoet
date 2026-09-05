@@ -41,6 +41,24 @@ public class TypeSpecTest : Object {
             assert_true (CodeCompiler.verify_code_compiles (code));
         });
 
+        Test.add_func ("/valapoet/type_spec/formatted_comments_and_docstrings", () => {
+            var class_spec = TypeSpec.class_builder ("FormattedItem")
+                .visibility (Visibility.PUBLIC)
+                .superclass (TypeName.OBJECT)
+                .add_comment ("Version %d of %s", 2, "Widget")
+                .add_valadoc ("Docstring for %s", "FormattedItem")
+                .build ();
+
+            var vala_file = ValaFile.builder ()
+                .add_type (class_spec)
+                .build ();
+
+            string code = vala_file.to_string ();
+            assert_true (code.contains ("// Version 2 of Widget"));
+            assert_true (code.contains ("Docstring for FormattedItem"));
+            assert_true (CodeCompiler.verify_code_compiles (code));
+        });
+
         Test.add_func ("/valapoet/type_spec/struct_builder", () => {
             var struct_spec = TypeSpec.struct_builder ("Point2D")
             .visibility (Visibility.PUBLIC)

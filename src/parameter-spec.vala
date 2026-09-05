@@ -20,14 +20,6 @@ namespace ValaPoet {
 
     public class ParameterSpec : Nameable, GLib.Object {
 
-
-
-        public enum Direction {
-            IN,
-            OUT,
-            REF
-        }
-
         public string name { get; protected set; }
         public TypeName type_name { get; private set; }
         public unowned GLib.List<AttributeSpec> attributes { get; private set; }

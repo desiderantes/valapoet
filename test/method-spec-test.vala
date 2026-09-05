@@ -28,6 +28,8 @@ public class MethodSpecTest : Object {
         Test.add_func ("/valapoet/method_spec/builder_and_parameters", () => {
             var get_method = MethodSpec.method_builder ("get")
             .visibility (Visibility.PUBLIC)
+            .add_comment ("Method comment %s %d", "task", 1)
+            .add_valadoc ("Method docstring %s", "get")
             .add_parameter (ParameterSpec.builder (TypeName.INT, "index").build ())
             .returns (TypeName.STRING)
             .add_statement ("return \"item\"")
@@ -59,6 +61,8 @@ public class MethodSpecTest : Object {
             .build ();
 
             string code = vala_file.to_string ();
+            assert_true (code.contains ("// Method comment task 1"));
+            assert_true (code.contains ("Method docstring get"));
             assert_true (code.contains ("public string get (int index) {\n"));
             assert_true (code.contains ("public void set (int index, string item) {\n"));
             assert_true (code.contains ("public bool contains (string needle) {\n"));
