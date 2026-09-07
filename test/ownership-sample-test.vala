@@ -29,6 +29,12 @@ public class OwnershipSampleTest : Object {
             var expected = """public class Node : GLib.Object {
 	public weak Node? parent;
 	public string data;
+	public unowned Node owner_node {
+		get; set;
+	}
+	public weak Node weak_node {
+		get; set;
+	}
 
 	public unowned Node get_parent () {
 		return parent;
@@ -49,6 +55,18 @@ public class OwnershipSampleTest : Object {
 
             var data_field = FieldSpec.builder (TypeName.STRING, "data")
             .visibility (Visibility.PUBLIC)
+            .build ();
+
+            var unowned_prop_type = ClassName.get ("", "Node").@unowned ();
+            var unowned_prop = PropertySpec.builder (unowned_prop_type, "owner_node")
+            .visibility (Visibility.PUBLIC)
+            .auto ()
+            .build ();
+
+            var weak_prop_type = ClassName.get ("", "Node").@weak ();
+            var weak_prop = PropertySpec.builder (weak_prop_type, "weak_node")
+            .visibility (Visibility.PUBLIC)
+            .auto ()
             .build ();
 
             var unowned_ret_type = ClassName.get ("", "Node").copy ();
@@ -76,6 +94,8 @@ public class OwnershipSampleTest : Object {
             .superclass (TypeName.OBJECT)
             .add_field (parent_field)
             .add_field (data_field)
+            .add_property (unowned_prop)
+            .add_property (weak_prop)
             .add_method (get_parent_method)
             .add_method (set_data_method)
             .build ();
