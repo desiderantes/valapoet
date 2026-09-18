@@ -8,16 +8,16 @@ It provides fluent builder APIs to generate robust, idiomatic Vala code programm
 
 ## Dependencies
 
-### Library (`libvalapoet`)
-`ValaPoet` has zero third-party library dependencies and relies exclusively on standard GLib core libraries:
+### Library (`src/`)
+`ValaPoet` relies exclusively on standard GLib core libraries:
 * **GLib** (`>= 2.80`)
-* **GObject** (`>= 2.80`)
-* **Gio** (`>= 2.80`)
+* **GObject**
+* **Gio**
 
 ### Test Suite (`test/`)
 Running the test suite (`meson test`) requires:
-* **Vala Compiler** (`>= 0.56`)
-* **Libgee** (`gee-0.8`) *(test suite only)*
+* **Vala Compiler (`valac`)** (`>= 0.56`)
+* **libgee** (`gee-0.8`)
 
 ---
 
